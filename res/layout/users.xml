@@ -1,0 +1,68 @@
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+    <TableLayout android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
+    
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="user name"/>
+        </TableRow>
+        <TableRow>
+
+            <EditText
+                android:id="@+id/userNameEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+        </TableRow>
+        <TableRow>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="password" />
+
+        </TableRow>
+        <TableRow>
+            <EditText android:id="@+id/passwordEditText"
+                      android:layout_height="wrap_content"
+                      android:layout_width="wrap_content"
+                      android:inputType="textPassword" 
+                      android:layout_weight="1"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:text="Machine"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"/>
+        </TableRow>
+        <TableRow>
+            <Spinner android:id="@+id/machineSpinner"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content" 
+                     android:animateLayoutChanges="true"/>
+
+        </TableRow>
+        
+        <TableRow>
+            <Spinner android:id="@+id/ConnectionTypeSpinner"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content" 
+                     android:animateLayoutChanges="true"/>
+
+        </TableRow>
+        
+        <TableRow>
+            <Button android:id="@+id/buttonConnection"
+                	android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="Connect"
+                    android:layout_weight="1"/>
+        </TableRow>
+        
+        
+    </TableLayout>
+</ScrollView>

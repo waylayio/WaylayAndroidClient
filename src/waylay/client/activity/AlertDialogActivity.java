@@ -1,0 +1,55 @@
+package waylay.client.activity;
+
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import com.waylay.client.R;
+
+public class AlertDialogActivity extends Activity {
+	
+	final Context context = this;
+	private Button button;
+
+	public void onCreate(Bundle savedInstanceState) {
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.alert);
+
+		button = (Button) findViewById(R.id.buttonAlert);
+
+		// add button listener
+		button.setOnClickListener(new OnClickListener() {
+
+		@Override
+		public void onClick(View arg0) {
+
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+				context);
+
+			// set title
+			alertDialogBuilder.setTitle("Alert Box");
+
+			// set dialog message
+			alertDialogBuilder.setMessage(MainActivity.alertMessage)
+				.setCancelable(false)
+				.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,int id) {
+						dialog.cancel();
+						AlertDialogActivity.this.finish();
+					}
+				  });
+				// create alert dialog
+				AlertDialog alertDialog = alertDialogBuilder.create();
+
+				// show it
+				alertDialog.show();
+			}
+		});
+	}
+}
