@@ -32,11 +32,11 @@ public class SetupActivity extends Activity{
 	        mSaveSSOButton = (Button) findViewById(R.id.buttonSaveSSOSetup);
 	        
   
-	        if(MainActivity.ssoSetup != null){
-	        	Log.d(TAG, "selected existing SSO " + MainActivity.ssoSetup);
-	        	mSSO_URL.setText((CharSequence) MainActivity.ssoSetup.getURL());
-	        	mSSO_Name.setText((CharSequence) MainActivity.ssoSetup.getName());
-	        	mSSO_Password.setText((CharSequence) MainActivity.ssoSetup.getPassword());
+	        if(MainActivity.bayesServer != null){
+	        	Log.d(TAG, "selected existing SSO " + MainActivity.bayesServer);
+	        	mSSO_URL.setText((CharSequence) MainActivity.bayesServer.getURL());
+	        	mSSO_Name.setText((CharSequence) MainActivity.bayesServer.getName());
+	        	mSSO_Password.setText((CharSequence) MainActivity.bayesServer.getPassword());
 	        	
 	        } else{
 	        	Log.d(TAG, "sso not selected, new sso will be created");
@@ -46,23 +46,23 @@ public class SetupActivity extends Activity{
 	        mSaveSSOButton.setOnClickListener(new View.OnClickListener() {
 	            public void onClick(View v) {
 	                Log.d(TAG, "mSaveSSOButton clicked");
-	                MainActivity.ssoSetup = getSSOInfo();
-	                MainActivity.listSSO.clear();
-					MainActivity.listSSO.add(MainActivity.ssoSetup);
-					MainActivity.adapterSSO.notifyDataSetChanged();	
+	                MainActivity.bayesServer = getBayesServer();
+	                MainActivity.listServers.clear();
+					MainActivity.listServers.add(MainActivity.bayesServer);
+					MainActivity.adapterSetup.notifyDataSetChanged();	
 					finish();
 	            }
 	        });     
 	 }
 	
-	private BayesServer getSSOInfo(){
+	private BayesServer getBayesServer(){
     	String name = mSSO_Name.getText().toString();
 		String password = mSSO_Password.getText().toString();
 		String URL = mSSO_URL.getText().toString();
-		BayesServer ssoSetup = new BayesServer(URL, name, password);
-		Log.d(TAG, "get sso " + ssoSetup);
+		BayesServer server = new BayesServer(URL, name, password);
+		Log.d(TAG, "get sso " + server);
 		
-		return ssoSetup;
+		return server;
     }
 	
 }

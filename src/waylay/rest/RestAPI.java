@@ -6,7 +6,7 @@ import org.json.JSONException;
 
 import waylay.client.data.MachineInfo;
 import waylay.client.data.BayesServer;
-import waylay.client.scenario.RemoteScenarioStatus;
+import waylay.client.scenario.Scenario;
 
 import android.util.Log;
 
@@ -15,16 +15,16 @@ import android.util.Log;
  * Entry point into the API.
  */
 public class RestAPI{   
-	protected static final String TAG = "SSO REST API";
+	protected static final String TAG = "REST API";
 
-	private static RestAPI sso = null;
+	private static RestAPI instance = null;
 
 	static {
-		sso = new RestAPI();
+		instance = new RestAPI();
 	}
 
 	public static RestAPI getInstance() {
-		return sso;
+		return instance;
 	}
 
 	private RestAPI(){}
@@ -84,7 +84,7 @@ public class RestAPI{
 				Log.i(TAG, response);
 				boolean error = false;
 				String message = null;
-				ArrayList<RemoteScenarioStatus> scenarios = new ArrayList<RemoteScenarioStatus>() ;
+				ArrayList<Scenario> scenarios = new ArrayList<Scenario>() ;
 
 				if(GetTask.NO_RESULT.equals(response)){
 					error = true;
@@ -92,7 +92,7 @@ public class RestAPI{
 				} else {
 
 					try {
-						scenarios = ScenarioUtil.getAllScenariosViaJSON(response);
+						scenarios = ScenarioJSONParser.getAllScenariosViaJSON(response);
 					} catch (Exception e) {
 						error = true;
 						message = e.getMessage();

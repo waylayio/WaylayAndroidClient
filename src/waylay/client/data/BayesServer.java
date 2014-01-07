@@ -34,6 +34,11 @@ public class BayesServer {
 		    
 	}
 	
+	public String constructURLtoListAllScenarios(){
+		 return "http://" + getURL() +"/scenarios";
+		    
+	}
+	
 	public String constructURLtoGetIpAddress(){
 		 return "http://" + getName()+ ":" + getPassword() + "@" + getURL() + "/appserver/rest/cloud_api_machine/getPublicIpaddress?machineguid=";
 		    

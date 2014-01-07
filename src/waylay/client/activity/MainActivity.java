@@ -11,6 +11,7 @@ import waylay.client.data.ResourceUsage;
 import waylay.client.data.BayesServer;
 import waylay.client.data.StorageUsage;
 import waylay.client.data.UserInfo;
+import waylay.client.scenario.Scenario;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.Dashboard;
 import waylay.rest.Machine;
@@ -38,40 +39,45 @@ import android.widget.TabHost;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends TabActivity {
-	public static final String TAG = "RDP Manager";
+	public static final String TAG = "Main Manager";
 
 
 	UserFactory userFactory;
 
 	private Button mAddUserButton;
 	private Button mAddMachineButton;
-	private Button mAddSSOMachinesButton;
+	private Button mAddSetupButton;
 	public static ArrayList<UserInfo> listUsers = new ArrayList<UserInfo>();
 	public static ArrayList<MachineInfo> listMachines = new ArrayList<MachineInfo>();
-	public static ArrayList<BayesServer> listSSO = new ArrayList<BayesServer>();
+	public static ArrayList<Scenario> listScenarios = new ArrayList<Scenario>();
+	public static ArrayList<BayesServer> listServers = new ArrayList<BayesServer>();
 	public static UserAdapter adapterUsers;
 	public static MachineAdapter adapterMachines;
-	public static SetupAdapter adapterSSO;
+	public static ScenarioAdapter adapterScenarios;
+	public static SetupAdapter adapterSetup;
 	ListView mUserList;
 	ListView mMachineList;
-	ListView mSSOList;
+	ListView mScenarioList;
+	ListView serverList;
 
 
 	protected Object mMachineActionMode;
+	protected Object mScenarioActionMode;
 	protected Object mUserActionMode;
-	protected Object mSSOActionMode;
+	protected Object mSetupActionMode;
 
 
 	protected static String alertMessage = "default alert message";
 
 	protected static UserInfo selectedUser = null;
 	protected static MachineInfo selectedMachine = null;
+	protected static Scenario selectedScenario = null;
 	protected static BackupInfo backupInfo;
 	protected static ReplicationInfo replicationInfo;
 	protected static ResourceUsage resourceUsage;
 	protected static ArrayList<StorageUsage> storageUsage;
 	protected static DiskStats diskStats;
-	protected static BayesServer ssoSetup = null;
+	protected static BayesServer bayesServer = null;
 
 
 	@Override
@@ -81,14 +87,15 @@ public class MainActivity extends TabActivity {
 
 		initUsers();
 		initMachines();
-		initSSO();
+		initScenarios();
+		initServer();
 
 		TabHost tabHost = getTabHost(); 
 		TabHost.TabSpec spec;
 
 		mAddUserButton = (Button) findViewById(R.id.buttonAddUsers);
 		mAddMachineButton = (Button) findViewById(R.id.buttonAddMachines);
-		mAddSSOMachinesButton = (Button) findViewById(R.id.buttonAddFromSSOMachines);
+		mAddSetupButton = (Button) findViewById(R.id.buttonAddFromSSOMachines);
 
 		mAddUserButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -110,25 +117,26 @@ public class MainActivity extends TabActivity {
 
 		});
 
-		mAddSSOMachinesButton.setOnClickListener(new View.OnClickListener() {
+		mAddSetupButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				if(ssoSetup != null){
-					getAllSSOMachines(ssoSetup.constructURLtoListAllMachines(), ssoSetup.getName(), ssoSetup.getPassword());
+				if(bayesServer != null){
+					//getAllSSOMachines(bayesServer.constructURLtoListAllMachines(), bayesServer.getName(), bayesServer.getPassword());
+					getAllScenarios(bayesServer.constructURLtoListAllScenarios(), bayesServer.getName(), bayesServer.getPassword());
 				}
 			}
 		});
 
 
-		spec = tabHost.newTabSpec("machines").setIndicator("Machines").setContent(R.id.Machines);        
+		spec = tabHost.newTabSpec("scenarios").setIndicator("Scenarios").setContent(R.id.Machines);        
 		//spec.setIndicator("Machines", getResources().getDrawable(R.drawable.icon_machine));
 		tabHost.addTab(spec);
 
-		spec = tabHost.newTabSpec("users").setIndicator("Connect").setContent(R.id.Users);        
+		spec = tabHost.newTabSpec("users").setIndicator("Users").setContent(R.id.Users);        
 		tabHost.addTab(spec);
 
-		spec = tabHost.newTabSpec("setup").setIndicator("SSO Setup").setContent(R.id.Setup);                   
+		spec = tabHost.newTabSpec("setup").setIndicator("Setup").setContent(R.id.Setup);                   
 		tabHost.addTab(spec);
 
 		tabHost.setCurrentTab(0);
@@ -186,20 +194,43 @@ public class MainActivity extends TabActivity {
 			}
 		});
 	}
+	
+	private void initScenarios() {
+		mScenarioList = (ListView) findViewById(R.id.listMachines);
+		adapterScenarios = new ScenarioAdapter(this, listScenarios);
+		mScenarioList.setAdapter(adapterScenarios);
+
+		mScenarioList.setClickable(true);   
+		mScenarioList.setOnItemClickListener(new MyMachineViewUserListener(this, UsersActivity.class));  
+
+		mScenarioList.setOnItemLongClickListener(new OnItemLongClickListener() {
+			// Called when the user long-clicks on someView
+			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+				if (mScenarioActionMode!= null) {
+					return false;
+				}
+				selectedScenario= (Scenario) mScenarioList.getItemAtPosition(position);
+				mScenarioActionMode = startActionMode(mMachineActionModeCallback);
+				view.setSelected(true);
+				return true;
+
+			}
+		});
+	}
 
 
-	private void initSSO() {
-		BayesServer initSSO = new BayesServer("griddemo1.incubaid.com", "admin", "admin");
-		ssoSetup = initSSO;
-		if(listSSO.size() == 0){
-			listSSO.add(initSSO);
+	private void initServer() {
+		bayesServer = new BayesServer("54.235.253.99/api", "admin", "admin");
+		if(listServers.size() == 0){
+			listServers.add(bayesServer);
 		}
-		mSSOList = (ListView) findViewById(R.id.listSSO);
-		adapterSSO = new SetupAdapter(this, listSSO);
-		mSSOList.setAdapter(adapterSSO);
+		serverList = (ListView) findViewById(R.id.listSSO);
+		adapterSetup = new SetupAdapter(this, listServers);
+		serverList.setAdapter(adapterSetup);
 
-		mSSOList.setClickable(true);   
-		mSSOList.setOnItemClickListener(new OnItemClickListener() {
+		serverList.setClickable(true);   
+		serverList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
@@ -208,12 +239,12 @@ public class MainActivity extends TabActivity {
 			}
 		});
 
-		mSSOList.setOnItemLongClickListener(new OnItemLongClickListener() {
+		serverList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-				if (mSSOActionMode != null) {
+				if (mSetupActionMode != null) {
 					return false;
 				}
-				mSSOActionMode = startActionMode(mSSOActionModeCallback);
+				mSetupActionMode = startActionMode(mSSOActionModeCallback);
 				view.setSelected(true);
 				return true;
 			}
@@ -297,7 +328,7 @@ public class MainActivity extends TabActivity {
 						updateMachines();
 						for(MachineInfo m: listMachines){
 							Log.i(TAG, "Update Machine "+ m.getName());
-							updateAllMachinesWithIp(ssoSetup.constructURLtoGetIpAddress(), m, ssoSetup.getName(), ssoSetup.getPassword());
+							updateAllMachinesWithIp(bayesServer.constructURLtoGetIpAddress(), m, bayesServer.getName(), bayesServer.getPassword());
 						}	
 					}
 					else{
@@ -371,6 +402,59 @@ public class MainActivity extends TabActivity {
 		Intent i = new Intent(this, SetupActivity.class);
 		startActivity(i);
 	}
+	
+	protected void updateScenarios() {
+		//TODO still need to make list a set, I hate this
+		for(Scenario m1: listScenarios){
+			ScenarioFactory.addScenario(m1);
+		}
+		listScenarios.clear();
+		listScenarios.addAll(ScenarioFactory.getsScenarios());
+		adapterScenarios.notifyDataSetChanged(); 
+	}
+	
+	public void getAllScenarios(String URL, String name, String password){ 
+		Log.d(TAG, "getAllScenarios");
+
+		RestAPI ssoAPI = RestAPI.getInstance();
+		final ProgressDialog progress = ProgressDialog.show(MainActivity.this, "", "Loading. Please wait...", true);
+
+		ssoAPI.getScenarios(URL, name, "" , password, new GetResponseCallback() {
+			@Override
+			public
+			void onDataReceived(ArrayList scenarios, boolean error, String message) {
+				Log.i(TAG, "Received response for scenarios: "+ scenarios.size());
+
+				if(!error){
+					for(Object o : scenarios){
+						ScenarioFactory.addScenario((Scenario) o);
+					}
+					progress.dismiss();
+					updateScenarios();	
+				}
+				else{
+					progress.dismiss();
+					alert(message);
+				}
+
+			}
+
+			@Override
+			public void onUpdate(boolean error, String message) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onDashboardReceived(Dashboard dashboard,
+					boolean error, String message) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
+
+	}
 
 
 	private class UserViewListener implements OnItemClickListener {
@@ -402,7 +486,7 @@ public class MainActivity extends TabActivity {
 			} else if (m_class.getName().contains("Machine")){
 				selectedMachine = (MachineInfo) mMachineList.getItemAtPosition(position);
 			} else {
-				ssoSetup = (BayesServer) mSSOList.getItemAtPosition(position);
+				bayesServer = (BayesServer) serverList.getItemAtPosition(position);
 			}
 			Intent i = new Intent(activity, m_class);
 			startActivity(i);
@@ -555,14 +639,14 @@ public class MainActivity extends TabActivity {
 		// Called when the user exits the action mode
 		@Override
 		public void onDestroyActionMode(ActionMode mode) {
-			mSSOActionMode = null;
+			mSetupActionMode = null;
 		}
 	};
 
 
 	protected void startBrowser() {
 		Log.d(TAG, "startBrowser");
-		Uri marketUri = Uri.parse("http://"+ssoSetup.getURL());
+		Uri marketUri = Uri.parse("http://"+bayesServer.getURL());
 		Intent marketIntent = new
 				Intent(Intent.ACTION_VIEW).setData(marketUri);
 		startActivity(marketIntent);
@@ -573,8 +657,8 @@ public class MainActivity extends TabActivity {
 		RestAPI ssoAPI = RestAPI.getInstance();
 		Dashboard ssoDashboard = new Dashboard();
 		final ProgressDialog progress = ProgressDialog.show(MainActivity.this, "", "Loading. Please wait...", true);
-		ssoAPI.getDashboardData(ssoSetup.constructURLtoGetDashboardData(), ssoSetup.getName(), 
-				ssoSetup.getPassword(), ssoDashboard , new GetResponseCallback() {
+		ssoAPI.getDashboardData(bayesServer.constructURLtoGetDashboardData(), bayesServer.getName(), 
+				bayesServer.getPassword(), ssoDashboard , new GetResponseCallback() {
 
 			@Override
 			public void onDashboardReceived(Dashboard dashboard, boolean error, String message) {
