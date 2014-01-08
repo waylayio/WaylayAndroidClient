@@ -30,16 +30,16 @@ public class ScenarioAdapter extends ArrayAdapter<Scenario> {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
-		TextView textHost = (TextView) rowView.findViewById(R.id.title);
+		TextView textTitle = (TextView) rowView.findViewById(R.id.title);
 		TextView textStatus = (TextView) rowView.findViewById(R.id.subtitle);
-		TextView textAddress = (TextView) rowView.findViewById(R.id.rightcorner);
+		TextView textID = (TextView) rowView.findViewById(R.id.rightcorner);
 		ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-		textHost.setText(values.get(position).getName());
+		textTitle.setText(values.get(position).getName());
 		textStatus.setText(values.get(position).getScenarioStatus().toString());
-		if("null".equals(textAddress) || textAddress == null){
-			textAddress.setText("");
+		if("null".equals(textID) || textID == null){
+			textID.setText("");
 		} else {
-			textAddress.setText(values.get(position).getId().toString());
+			textID.setText(values.get(position).getId().toString());
 		}
 		Scenario m = values.get(position);
 		if (!m.getScenarioStatus().equals(ScenarioStatus.RUNNING)) {

@@ -201,7 +201,7 @@ public class MainActivity extends TabActivity {
 		mScenarioList.setAdapter(adapterScenarios);
 
 		mScenarioList.setClickable(true);   
-		mScenarioList.setOnItemClickListener(new MyMachineViewUserListener(this, UsersActivity.class));  
+		mScenarioList.setOnItemClickListener(new MyScenarioViewUserListener(this, ScenarioActivity.class));  
 
 		mScenarioList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			// Called when the user long-clicks on someView
@@ -210,7 +210,7 @@ public class MainActivity extends TabActivity {
 				if (mScenarioActionMode!= null) {
 					return false;
 				}
-				selectedScenario= (Scenario) mScenarioList.getItemAtPosition(position);
+				selectedScenario = (Scenario) mScenarioList.getItemAtPosition(position);
 				mScenarioActionMode = startActionMode(mMachineActionModeCallback);
 				view.setSelected(true);
 				return true;
@@ -416,10 +416,10 @@ public class MainActivity extends TabActivity {
 	public void getAllScenarios(String URL, String name, String password){ 
 		Log.d(TAG, "getAllScenarios");
 
-		RestAPI ssoAPI = RestAPI.getInstance();
+		RestAPI restAPI = RestAPI.getInstance();
 		final ProgressDialog progress = ProgressDialog.show(MainActivity.this, "", "Loading. Please wait...", true);
 
-		ssoAPI.getScenarios(URL, name, "" , password, new GetResponseCallback() {
+		restAPI.getScenarios(URL, name, "" , password, new GetResponseCallback() {
 			@Override
 			public
 			void onDataReceived(ArrayList scenarios, boolean error, String message) {
@@ -454,6 +454,25 @@ public class MainActivity extends TabActivity {
 
 		});
 
+	}
+	
+	private class MyScenarioViewUserListener implements OnItemClickListener{
+
+		private Activity activity;
+		private Class m_class;
+
+		public MyScenarioViewUserListener(Activity activity, Class c){
+			this.activity = activity;
+			m_class = c;
+		}
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+			selectedScenario = (Scenario) mScenarioList.getItemAtPosition(position);
+			Intent i = new Intent(activity, m_class);
+			startActivity(i);
+
+		}	
 	}
 
 
