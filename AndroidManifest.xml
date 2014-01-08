@@ -27,6 +27,7 @@
         </activity>
        
        <activity android:name="waylay.client.activity.MachinesActivity" ></activity>
+       <activity android:name="waylay.client.activity.ScenarioActivity" ></activity>
        <activity android:name="waylay.client.activity.UsersActivity" ></activity>
        <activity android:name="waylay.client.activity.SetupActivityty" ></activity> 
        <activity android:name="waylay.client.activity.AlertDialogActivity" ></activity> 
