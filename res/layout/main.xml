@@ -37,15 +37,10 @@
 					        android:orientation="vertical" />	    
 					        
 							    
-						<Button android:id="@+id/buttonAddFromSSOMachines"
+						<Button android:id="@+id/buttonSyncWithServer"
 					        android:layout_width="match_parent"
 					        android:layout_height="wrap_content"
-					        android:text="Sync with BayesServer"/>
-	  
-						<Button android:id="@+id/buttonAddMachines"
-					        android:layout_width="match_parent"
-					        android:layout_height="wrap_content"
-					        android:text="Add Manually"/>
+					        android:text="Synchronize"/>
 			
                 </LinearLayout>
                 

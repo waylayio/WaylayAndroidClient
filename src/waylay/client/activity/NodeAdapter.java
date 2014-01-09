@@ -1,11 +1,11 @@
 package waylay.client.activity;
 
 import java.util.ArrayList;
+import java.util.Map;
+
+import waylay.client.scenario.Node;
 import waylay.client.scenario.Scenario;
 import waylay.client.scenario.ScenarioStatus;
-
-import com.waylay.client.R;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +14,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ScenarioAdapter extends ArrayAdapter<Scenario> {
+import com.waylay.client.R;
+
+public class NodeAdapter extends ArrayAdapter<Node> {
 	
 	private final Context context;
-	private final ArrayList<Scenario> values;
+	private final ArrayList<Node> values;
 
-	public ScenarioAdapter(Context context, ArrayList<Scenario> values) {
+	public NodeAdapter(Context context, ArrayList<Node> values) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
@@ -34,18 +36,16 @@ public class ScenarioAdapter extends ArrayAdapter<Scenario> {
 		TextView textStatus = (TextView) rowView.findViewById(R.id.subtitle);
 		TextView textID = (TextView) rowView.findViewById(R.id.rightcorner);
 		ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-		textTitle.setText(values.get(position).getName());
-		textStatus.setText(values.get(position).getScenarioStatus().toString());
-		if("null".equals(textID) || textID == null){
-			textID.setText("");
+		Node node = values.get(position);
+		//Map<String, Double> nodeStates = node.getStates();
+		String name = node.getName(); 
+		textTitle.setText(name);
+		textStatus.setText(node.getStatesAsString());
+		textID.setText(node.getMostLikelyState());
+		if (node.getName().equals(MainActivity.selectedScenario.getTargetNode())) {
+			imageView.setImageResource(R.drawable.trigger);
 		} else {
-			textID.setText(values.get(position).getId().toString());
-		}
-		Scenario m = values.get(position);
-		if (!m.getScenarioStatus().equals(ScenarioStatus.RUNNING)) {
-			imageView.setImageResource(R.drawable.nok);
-		} else {
-			imageView.setImageResource(R.drawable.ok);
+			imageView.setImageResource(R.drawable.sensor);
 		}
 
 		return rowView;

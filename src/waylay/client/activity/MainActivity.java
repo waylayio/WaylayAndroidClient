@@ -2,6 +2,10 @@ package waylay.client.activity;
 
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import waylay.client.data.BackupInfo;
 import waylay.client.data.DiskStats;
@@ -15,6 +19,7 @@ import waylay.client.scenario.Scenario;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.Dashboard;
 import waylay.rest.Machine;
+import waylay.rest.PostResponseCallback;
 import waylay.rest.RestAPI;
 import com.waylay.client.R;
 import android.app.Activity;
@@ -49,7 +54,7 @@ public class MainActivity extends TabActivity {
 	private Button mAddSetupButton;
 	public static ArrayList<UserInfo> listUsers = new ArrayList<UserInfo>();
 	public static ArrayList<MachineInfo> listMachines = new ArrayList<MachineInfo>();
-	public static ArrayList<Scenario> listScenarios = new ArrayList<Scenario>();
+	//public static ArrayList<Scenario> listScenarios = new ArrayList<Scenario>();
 	public static ArrayList<BayesServer> listServers = new ArrayList<BayesServer>();
 	public static UserAdapter adapterUsers;
 	public static MachineAdapter adapterMachines;
@@ -94,8 +99,8 @@ public class MainActivity extends TabActivity {
 		TabHost.TabSpec spec;
 
 		mAddUserButton = (Button) findViewById(R.id.buttonAddUsers);
-		mAddMachineButton = (Button) findViewById(R.id.buttonAddMachines);
-		mAddSetupButton = (Button) findViewById(R.id.buttonAddFromSSOMachines);
+		//mAddMachineButton = (Button) findViewById(R.id.buttonSyncWithServer);
+		mAddSetupButton = (Button) findViewById(R.id.buttonSyncWithServer);
 
 		mAddUserButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -107,7 +112,7 @@ public class MainActivity extends TabActivity {
 
 		});
 
-		mAddMachineButton.setOnClickListener(new View.OnClickListener() {
+/*		mAddMachineButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				Log.d(TAG, "mAddMachineButton clicked");
 				selectedUser = null;
@@ -115,7 +120,7 @@ public class MainActivity extends TabActivity {
 				launchMachineAdder();
 			}
 
-		});
+		});*/
 
 		mAddSetupButton.setOnClickListener(new View.OnClickListener() {
 
@@ -197,7 +202,7 @@ public class MainActivity extends TabActivity {
 	
 	private void initScenarios() {
 		mScenarioList = (ListView) findViewById(R.id.listMachines);
-		adapterScenarios = new ScenarioAdapter(this, listScenarios);
+		adapterScenarios = new ScenarioAdapter(this, ScenarioFactory.getsScenarios());
 		mScenarioList.setAdapter(adapterScenarios);
 
 		mScenarioList.setClickable(true);   
@@ -207,11 +212,11 @@ public class MainActivity extends TabActivity {
 			// Called when the user long-clicks on someView
 			public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-				if (mScenarioActionMode!= null) {
+				/*if (mScenarioActionMode!= null) {
 					return false;
-				}
+				}*/
 				selectedScenario = (Scenario) mScenarioList.getItemAtPosition(position);
-				mScenarioActionMode = startActionMode(mMachineActionModeCallback);
+				startActionMode(MyScenarioActionModeCallback);
 				view.setSelected(true);
 				return true;
 
@@ -404,17 +409,12 @@ public class MainActivity extends TabActivity {
 	}
 	
 	protected void updateScenarios() {
-		//TODO still need to make list a set, I hate this
-		for(Scenario m1: listScenarios){
-			ScenarioFactory.addScenario(m1);
-		}
-		listScenarios.clear();
-		listScenarios.addAll(ScenarioFactory.getsScenarios());
 		adapterScenarios.notifyDataSetChanged(); 
 	}
 	
 	public void getAllScenarios(String URL, String name, String password){ 
 		Log.d(TAG, "getAllScenarios");
+		ScenarioFactory.clear();
 
 		RestAPI restAPI = RestAPI.getInstance();
 		final ProgressDialog progress = ProgressDialog.show(MainActivity.this, "", "Loading. Please wait...", true);
@@ -436,7 +436,48 @@ public class MainActivity extends TabActivity {
 					progress.dismiss();
 					alert(message);
 				}
+			}
 
+			@Override
+			public void onUpdate(boolean error, String message) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onDashboardReceived(Dashboard dashboard,
+					boolean error, String message) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
+
+	}
+	
+	public void getScenario(String URL, String name, String password){ 
+		Log.d(TAG, "getAllScenarios");
+		
+		RestAPI restAPI = RestAPI.getInstance();
+		final ProgressDialog progress = ProgressDialog.show(MainActivity.this, "", "Loading. Please wait...", true);
+
+		restAPI.getScenario(URL, name, "" , password, new GetResponseCallback() {
+			@Override
+			public
+			void onDataReceived(ArrayList scenarios, boolean error, String message) {
+				Log.i(TAG, "Received response for scenarios: "+ scenarios.size());
+
+				if(!error){
+					for(Object o : scenarios){
+						ScenarioFactory.addScenario((Scenario) o);
+					}
+					progress.dismiss();
+					updateScenarios();	
+				}
+				else{
+					progress.dismiss();
+					alert(message);
+				}
 			}
 
 			@Override
@@ -474,6 +515,79 @@ public class MainActivity extends TabActivity {
 
 		}	
 	}
+	
+	private ActionMode.Callback MyScenarioActionModeCallback = new ActionMode.Callback() {
+
+		// Called when the action mode is created; startActionMode() was called
+		@Override
+		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+			// Inflate a menu resource providing context menu items
+			MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.layout.menu_scenario, menu);
+
+			return true;
+		}
+
+		// Called each time the action mode is shown. Always called after onCreateActionMode, but
+		// may be called multiple times if the mode is invalidated.
+		@Override
+		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+			return false; // Return false if nothing is done
+		}
+
+		// Called when the user selects a contextual menu item
+		@Override
+		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+			switch (item.getItemId()) {
+			case R.id.itemDeleteScenario:
+				mode.finish(); 
+				actioScenarioItem("delete");
+				return true;
+			case R.id.itemStartScenario:
+				mode.finish(); 
+				actioScenarioItem("start");
+				return true;
+			case R.id.itemStopScenario:
+				mode.finish(); 
+				actioScenarioItem("stop");
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		private void actioScenarioItem(String action) {
+			Long id = MainActivity.selectedScenario.getId();
+			final RestAPI rest = RestAPI.getInstance();
+			final String url = bayesServer.constructURLtoForScenario(id);
+			if("stop".equals(action) || "start".equals(action)){
+				List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+			      nameValuePairs.add(new BasicNameValuePair("action", action));
+				rest.postScenarioAction(url, nameValuePairs, new PostResponseCallback(){
+					@Override
+					public void onPostSuccess() {
+						Log.i(TAG, "action was success");
+						getScenario(url, "", "");
+					}});
+			} else if("delete".equals(action)){
+				rest.deleteScenarioAction(url,  new PostResponseCallback(){
+					@Override
+					public void onPostSuccess() {
+						Log.i(TAG, "action was success");
+						ScenarioFactory.removeScenario(MainActivity.selectedScenario);
+						MainActivity.selectedScenario = null;
+						updateScenarios();
+					}});
+			}
+			
+		}
+
+		// Called when the user exits the action mode
+		@Override
+		public void onDestroyActionMode(ActionMode mode) {
+			mMachineActionMode = null;
+		}
+	};
 
 
 	private class UserViewListener implements OnItemClickListener {

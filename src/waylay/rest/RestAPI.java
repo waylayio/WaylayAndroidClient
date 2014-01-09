@@ -1,7 +1,9 @@
 package waylay.rest;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.NameValuePair;
 import org.json.JSONException;
 
 import waylay.client.data.MachineInfo;
@@ -67,6 +69,21 @@ public class RestAPI{
 
 	}
 
+	public void postScenarioAction(String restUrl, List<NameValuePair> nameValuePairs, final PostResponseCallback callback){
+		new PostTask(restUrl, nameValuePairs, new RestTaskCallback(){
+			public void onTaskComplete(String response){
+				callback.onPostSuccess();
+			}
+		}).execute("");
+	}
+	
+	public void deleteScenarioAction(String restUrl, final PostResponseCallback callback){
+		new DeleteTask(restUrl, new RestTaskCallback(){
+			public void onTaskComplete(String response){
+				callback.onPostSuccess();
+			}
+		}).execute("");
+	}
 	
 	/**
 	 * Request a Scenarios from the REST server.
@@ -93,6 +110,38 @@ public class RestAPI{
 
 					try {
 						scenarios = ScenarioJSONParser.getAllScenariosViaJSON(response);
+					} catch (Exception e) {
+						error = true;
+						message = e.getMessage();
+						Log.e(TAG, message);
+					}
+				}
+				callback.onDataReceived(scenarios, error, message);
+			}
+		}).execute("");
+
+	}
+	
+	public void getScenario(String restUrl, String name, String filter, String password, final GetResponseCallback callback){
+
+		String call1 = restUrl + filter;
+		Log.d(TAG, "getScenarios with url "+ call1);
+
+		new GetTask(call1, name, password, new RestTaskCallback (){
+			@Override
+			public void onTaskComplete(String response){
+				//parse response
+				Log.i(TAG, response);
+				boolean error = false;
+				String message = null;
+				ArrayList<Scenario> scenarios = new ArrayList<Scenario>() ;
+
+				if(GetTask.NO_RESULT.equals(response)){
+					error = true;
+					message = GetTask.getError();
+				} else {
+					try {
+						scenarios.add(ScenarioJSONParser.parseScenario(response));
 					} catch (Exception e) {
 						error = true;
 						message = e.getMessage();
@@ -173,11 +222,7 @@ public class RestAPI{
 	 * @param callback The callback to execute when submission status is available.
 	 */
 	public void postUserProfile(String restUrl, String requestBody, ArrayList<Machine> machines, final PostResponseCallback callback){
-		new PostTask(restUrl, requestBody, new RestTaskCallback(){
-			public void onTaskComplete(String response){
-				callback.onPostSuccess();
-			}
-		});
+
 	}
 }
 

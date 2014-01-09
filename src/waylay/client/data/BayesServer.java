@@ -35,8 +35,11 @@ public class BayesServer {
 	}
 	
 	public String constructURLtoListAllScenarios(){
-		 return "http://" + getURL() +"/scenarios";
-		    
+		 return "http://" + getURL() +"/scenarios";    
+	}
+	
+	public String constructURLtoForScenario(Long id){
+		 return "http://" + getURL() +"/scenarios/" +id;    
 	}
 	
 	public String constructURLtoGetIpAddress(){

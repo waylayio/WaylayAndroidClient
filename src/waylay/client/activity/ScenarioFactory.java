@@ -2,28 +2,33 @@ package waylay.client.activity;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 
 import waylay.client.scenario.Scenario;
 
 public class ScenarioFactory {
 
-	private static final Set<Scenario> scenarioList = new HashSet<Scenario>();
+	private static final ArrayList<Scenario> scenarioList = new ArrayList<Scenario>();
 	
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Scenario> getsScenarios() {
-		ArrayList<Scenario> l = new ArrayList<Scenario>(scenarioList);
-		Collections.sort(l);
-		return l;
+		Collections.sort(scenarioList);
+		return scenarioList;
+	}
+	
+	public static void clear(){
+		scenarioList.clear();
 	}
 	
 	public static void addScenario(Scenario scenario){
-		scenarioList.add(scenario);
+		if(scenarioList.contains(scenario)){
+			removeScenario(scenario);
+			scenarioList.add(scenario);
+			Collections.sort(scenarioList);
+		}else
+			scenarioList.add(scenario);
 	}
 	
-	public static void removeMachine(Scenario scenario){
+	public static void removeScenario(Scenario scenario){
 		scenarioList.remove(scenario);
 	}
 

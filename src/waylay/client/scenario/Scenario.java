@@ -28,6 +28,10 @@ public class Scenario implements Comparable{
     public void addNode(Node node){
     	nodes.add(node);
     }
+    
+    public ArrayList<Node> getNodes(){
+    	return nodes;
+    }
 
     public int getRefreshRate() {
         return refreshRate;
