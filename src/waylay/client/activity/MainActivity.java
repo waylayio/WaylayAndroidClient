@@ -16,6 +16,10 @@ import waylay.client.data.BayesServer;
 import waylay.client.data.StorageUsage;
 import waylay.client.data.UserInfo;
 import waylay.client.scenario.Scenario;
+import waylay.client.sensor.AccelerometerSensor;
+import waylay.client.sensor.LocalSensor;
+import waylay.client.sensor.LocationSensor;
+import waylay.client.sensor.ForceSensor;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.Dashboard;
 import waylay.rest.Machine;
@@ -26,7 +30,16 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.TabActivity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,25 +54,28 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
+import android.widget.Toast;
 
 @SuppressWarnings("deprecation")
-public class MainActivity extends TabActivity {
+public class MainActivity extends TabActivity implements LocationListener, SensorEventListener  {
 	public static final String TAG = "Main Manager";
 
 
 	UserFactory userFactory;
 
-	private Button mAddUserButton;
-	private Button mAddMachineButton;
-	private Button mAddSetupButton;
+	//private Button mAddUserButton;
+	private Button mSyncButton;
 	public static ArrayList<UserInfo> listUsers = new ArrayList<UserInfo>();
 	public static ArrayList<MachineInfo> listMachines = new ArrayList<MachineInfo>();
 	//public static ArrayList<Scenario> listScenarios = new ArrayList<Scenario>();
 	public static ArrayList<BayesServer> listServers = new ArrayList<BayesServer>();
+	public static ArrayList<LocalSensor> listLocalSensors = new ArrayList<LocalSensor>();
 	public static UserAdapter adapterUsers;
 	public static MachineAdapter adapterMachines;
-	public static ScenarioAdapter adapterScenarios;
 	public static SetupAdapter adapterSetup;
+	public static ScenarioAdapter adapterScenarios;
+	public static SensorAdapter adapterLocalSensors;
+	ListView mLocalSensorList;
 	ListView mUserList;
 	ListView mMachineList;
 	ListView mScenarioList;
@@ -84,23 +100,32 @@ public class MainActivity extends TabActivity {
 	protected static DiskStats diskStats;
 	protected static BayesServer bayesServer = null;
 
+	//sensors
+	protected LocationSensor locationSensor = new LocationSensor();
+	protected AccelerometerSensor accelometerSensor = new AccelerometerSensor();
+	protected ForceSensor velocitySensor = new ForceSensor();
+	private LocationManager locationManager;
+	private SensorManager sensorManager;
+	private String provider;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		initUsers();
-		initMachines();
+		//initUsers();
+		//initMachines();
 		initScenarios();
+		initLocalSensors();
 		initServer();
 
 		TabHost tabHost = getTabHost(); 
 		TabHost.TabSpec spec;
 
-		mAddUserButton = (Button) findViewById(R.id.buttonAddUsers);
+		mSyncButton = (Button) findViewById(R.id.buttonSyncWithServer);
+		/*mAddUserButton = (Button) findViewById(R.id.buttonAddUsers);
 		//mAddMachineButton = (Button) findViewById(R.id.buttonSyncWithServer);
-		mAddSetupButton = (Button) findViewById(R.id.buttonSyncWithServer);
+		
 
 		mAddUserButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -110,7 +135,7 @@ public class MainActivity extends TabActivity {
 				launchUserAdder();
 			}
 
-		});
+		});*/
 
 /*		mAddMachineButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -122,7 +147,7 @@ public class MainActivity extends TabActivity {
 
 		});*/
 
-		mAddSetupButton.setOnClickListener(new View.OnClickListener() {
+		mSyncButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -138,7 +163,7 @@ public class MainActivity extends TabActivity {
 		//spec.setIndicator("Machines", getResources().getDrawable(R.drawable.icon_machine));
 		tabHost.addTab(spec);
 
-		spec = tabHost.newTabSpec("users").setIndicator("Users").setContent(R.id.Users);        
+		spec = tabHost.newTabSpec("sensors").setIndicator("Sensors").setContent(R.id.Users);        
 		tabHost.addTab(spec);
 
 		spec = tabHost.newTabSpec("setup").setIndicator("Setup").setContent(R.id.Setup);                   
@@ -152,6 +177,37 @@ public class MainActivity extends TabActivity {
 		Intent i = new Intent(this, AlertDialogActivity.class);
 		startActivity(i);   
 
+	}
+	
+	private void initLocalSensors() {
+		listLocalSensors.remove(locationSensor);
+		listLocalSensors.add(locationSensor);
+		listLocalSensors.remove(accelometerSensor);
+		listLocalSensors.add(accelometerSensor);
+		listLocalSensors.remove(velocitySensor);
+		listLocalSensors.add(velocitySensor);
+		mLocalSensorList = (ListView) findViewById(R.id.listUsers);
+		adapterLocalSensors = new SensorAdapter(this, listLocalSensors);
+		mLocalSensorList.setAdapter(adapterLocalSensors);
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+	    // Define the criteria how to select the locatioin provider -> use
+	    // default
+	    Criteria criteria = new Criteria();
+	    provider = locationManager.getBestProvider(criteria, false);
+	    Location location = locationManager.getLastKnownLocation(provider);
+
+	    // Initialize the location fields
+	    if (location != null) {
+	      Log.d(TAG, "Provider " + provider + " has been selected.");
+	      onLocationChanged(location);
+	    } else {
+	      Log.w(TAG, "Location not available");
+	    }
+	    sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+	    sensorManager.registerListener(this,
+	            sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+	    sensorManager.registerListener(this,
+	            sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
 	private void initUsers() {
@@ -355,8 +411,6 @@ public class MainActivity extends TabActivity {
 					// TODO Auto-generated method stub
 
 				}
-
-
 			});
 		}
 
@@ -825,5 +879,80 @@ public class MainActivity extends TabActivity {
 		});
 
 	}
+
+	@Override
+	public void onLocationChanged(Location location) {
+		locationSensor.setLatitude(location.getLatitude());
+		locationSensor.setLongitude(location.getLongitude());
+		adapterLocalSensors.notifyDataSetChanged(); 
+	}
+
+	/* Request updates at startup */
+	  @Override
+	  protected void onResume() {
+	    super.onResume();
+	    locationManager.requestLocationUpdates(provider, 400, 1, this);
+	    sensorManager.registerListener(this,
+	            sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+	    sensorManager.registerListener(this,
+	            sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), SensorManager.SENSOR_DELAY_NORMAL);
+	  }
+
+	  @Override
+	  protected void onPause() {
+	    super.onPause();
+	    locationManager.removeUpdates(this);
+	    sensorManager.unregisterListener(this);
+	  }
+
+	  @Override
+	  public void onStatusChanged(String provider, int status, Bundle extras) {
+	    // TODO Auto-generated method stub
+
+	  }
+
+	  @Override
+	  public void onProviderEnabled(String provider) {
+	    Toast.makeText(this, "Enabled new provider " + provider,
+	        Toast.LENGTH_SHORT).show();
+
+	  }
+
+	  @Override
+	  public void onProviderDisabled(String provider) {
+	    Toast.makeText(this, "Disabled provider " + provider,
+	        Toast.LENGTH_SHORT).show();
+	  }
+
+	@Override
+	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onSensorChanged(SensorEvent event) {
+		if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+		      updateSensorEvent(event);
+		      return; //don't try the other one ...
+		}
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			updateSensorEvent(event);
+		}
+	}
+
+	private void updateSensorEvent(SensorEvent event) {
+		float[] values = event.values;
+		long actualTime = event.timestamp;
+		if(accelometerSensor.isTilt(event.values))
+			return;
+	    //if ((actualTime - velocitySensor.getLastUpdate()) * LocalSensor.NS2S > .02) {
+	    	velocitySensor.updateData(actualTime, values);
+	    	adapterLocalSensors.notifyDataSetChanged();
+	    	accelometerSensor.updateData(actualTime, values);
+	    	adapterLocalSensors.notifyDataSetChanged(); 
+	   // }
+	}
+	
 
 }
