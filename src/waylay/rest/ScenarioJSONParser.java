@@ -47,9 +47,16 @@ public class ScenarioJSONParser {
         for(int k=0; k < nodes.length(); k++){
         	JSONObject obj = nodes.getJSONObject(k);
         	String name1 = obj.getString("name");
-        	Log.d(TAG, "node "+name1);
+        	String sensorName = null;
+        	try{
+            	JSONObject sensor = obj.getJSONObject("sensor");
+            	sensorName = sensor.getString("name");	
+        	}catch (Exception e){
+        		
+        	}
+        	Log.d(TAG, "node "+name1 + " , sensor "+ sensorName);
         	JSONArray states = obj.getJSONArray("states");
-        	Node node = new Node(name1);
+        	Node node = new Node(name1, sensorName);
         	for(int j=0; j < states.length(); j++){
         		JSONObject stateObj = states.getJSONObject(j);
         		Iterator itr = stateObj.keys();

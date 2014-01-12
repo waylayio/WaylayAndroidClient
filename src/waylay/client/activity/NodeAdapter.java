@@ -1,11 +1,9 @@
 package waylay.client.activity;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.lang.reflect.Field;
 
 import waylay.client.scenario.Node;
-import waylay.client.scenario.Scenario;
-import waylay.client.scenario.ScenarioStatus;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +43,13 @@ public class NodeAdapter extends ArrayAdapter<Node> {
 		if (node.getName().equals(MainActivity.selectedScenario.getTargetNode())) {
 			imageView.setImageResource(R.drawable.trigger);
 		} else {
-			imageView.setImageResource(R.drawable.sensor);
+			try {
+				Field field = R.drawable.class.getDeclaredField(node.getSensorName().toLowerCase());
+				int a = field.getInt(this);
+				imageView.setImageResource(a);
+			} catch (Exception e) {
+				imageView.setImageResource(R.drawable.sensor);
+			}
 		}
 
 		return rowView;

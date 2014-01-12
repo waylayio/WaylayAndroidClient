@@ -34,6 +34,7 @@
        <activity android:name="waylay.client.activity.SetupActivityty" ></activity> 
        <activity android:name="waylay.client.activity.AlertDialogActivity" ></activity> 
        <activity android:name="waylay.client.activity.PlotActivityity" ></activity> 
+       <activity android:name="waylay.client.activity.LocalSensorActivity" ></activity> 
        
          
     </application>

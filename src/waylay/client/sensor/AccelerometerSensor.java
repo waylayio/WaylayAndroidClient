@@ -1,6 +1,8 @@
 package waylay.client.sensor;
 
 import java.text.DecimalFormat;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import waylay.client.statistcs.LPFWikipedia;
 import waylay.client.statistcs.LowPassFilter;
@@ -49,7 +51,7 @@ public class AccelerometerSensor extends LocalSensor{
 
 	@Override
 	public String toString() {
-		return "acceleration=" + new DecimalFormat("#.##").format(getAcceleration()) + "]";
+		return "[acceleration=" + new DecimalFormat("#.##").format(getAcceleration()) + "]";
 	}
 
 	@Override
@@ -87,6 +89,13 @@ public class AccelerometerSensor extends LocalSensor{
 				filteredSample[1]  * filteredSample[1]  + filteredSample[2]  * filteredSample[2]))) 
 				/SensorManager.GRAVITY_EARTH;
 		return acceleration < TILT_THRESHOLD;
+	}
+
+	@Override
+	public Map<String, String> getRuntimeData() {
+		Map<String, String> map = new ConcurrentHashMap<String, String>();
+		map.put("runtime_accelerator", Double.toString(acceleration));
+		return map;
 	}
 
 }

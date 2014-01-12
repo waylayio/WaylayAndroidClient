@@ -1,5 +1,8 @@
 package waylay.client.sensor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class LocationSensor extends LocalSensor{
 	private double latitude = -1.0;
 	private double longitude = -1.0;
@@ -47,6 +50,13 @@ public class LocationSensor extends LocalSensor{
 	
 	public String getName(){
 		return "Location";
+	}
+	@Override
+	public Map<String, String> getRuntimeData() {
+		Map<String, String> map = new ConcurrentHashMap<String, String>();
+		map.put("runtime_latitude", Double.toString(latitude));
+		map.put("runtime_longitude", Double.toString(longitude));
+		return map;
 	}
 
 }

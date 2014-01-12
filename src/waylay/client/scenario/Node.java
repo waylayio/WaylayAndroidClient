@@ -6,9 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Node {
 	private Map<String, Double> node = new ConcurrentHashMap<String, Double>();
 	private String name;
+	private String sensorName;
 	
-	public Node(String name) {
+	public Node(String name, String sensorName) {
 		this.name = name;
+		this.sensorName = sensorName;
 	}
 
 	public void addState(String state, Double probability){
@@ -21,6 +23,10 @@ public class Node {
 	
 	public String getName(){
 		return name;
+	}
+	
+	public String getSensorName(){
+		return sensorName;
 	}
 
 	public boolean isMostLikelyStateNOK() {

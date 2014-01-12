@@ -68,6 +68,10 @@
 				        android:layout_height="wrap_content"
 				        android:layout_weight="1"
 				        android:orientation="vertical" />
+                 <Button android:id="@+id/buttonStopPushingData"
+					        android:layout_width="match_parent"
+					        android:layout_height="wrap_content"
+					        android:text="Stop pushing data"/>
             
                 </LinearLayout>
             </FrameLayout>

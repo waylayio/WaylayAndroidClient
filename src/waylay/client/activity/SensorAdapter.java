@@ -38,7 +38,7 @@ public class SensorAdapter extends ArrayAdapter<LocalSensor> {
 		textStatus.setText(values.get(position).toString());
 		textAddress.setText(values.get(position).getStatus());
 		LocalSensor m = values.get(position);
-		imageView.setImageResource(R.drawable.user);
+		imageView.setImageResource(R.drawable.sensor);
 		return rowView;
 	}
 }

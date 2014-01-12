@@ -1,5 +1,7 @@
 package waylay.client.sensor;
 import java.text.DecimalFormat;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import waylay.client.statistcs.LPFWikipedia;
 import waylay.client.statistcs.LowPassFilter;
@@ -79,6 +81,13 @@ public class ForceSensor extends LocalSensor{
 		y = filteredSample[1] ;
 		z = filteredSample[2];
 		setLastUpdate(time);
+	}
+
+	@Override
+	public Map<String, String> getRuntimeData() {
+		Map<String, String> map = new ConcurrentHashMap<String, String>();
+		map.put("runtime_force", Double.toString(force));
+		return map;
 	}
 
 }

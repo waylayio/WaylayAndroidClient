@@ -1,5 +1,8 @@
 package waylay.client.sensor;
 
+import java.util.Map;
+
+
 public abstract class LocalSensor {
 	public abstract String getStatus();
 	public abstract int getId();
@@ -20,5 +23,5 @@ public abstract class LocalSensor {
 		LocationSensor other = (LocationSensor) obj;
 		return getId() == other.getId();
 	}
-	
+	public abstract Map<String, String> getRuntimeData();
 }

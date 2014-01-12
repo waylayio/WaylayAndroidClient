@@ -3,6 +3,7 @@ package waylay.client.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -61,6 +62,8 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	public static final String TAG = "Main Manager";
 
 
+	protected static final long PUSH_PERIOD = 10000;
+
 	UserFactory userFactory;
 
 	//private Button mAddUserButton;
@@ -100,6 +103,11 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	protected static DiskStats diskStats;
 	protected static BayesServer bayesServer = null;
 
+	public static LocalSensor selectedLocalSensor;
+
+
+	protected static boolean stopPushing = false;
+
 	//sensors
 	protected LocationSensor locationSensor = new LocationSensor();
 	protected AccelerometerSensor accelometerSensor = new AccelerometerSensor();
@@ -123,6 +131,15 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		TabHost.TabSpec spec;
 
 		mSyncButton = (Button) findViewById(R.id.buttonSyncWithServer);
+		Button buttonStopPushingData = (Button) findViewById(R.id.buttonStopPushingData);
+		buttonStopPushingData.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				stopPush();
+			}
+		});
+		
 		/*mAddUserButton = (Button) findViewById(R.id.buttonAddUsers);
 		//mAddMachineButton = (Button) findViewById(R.id.buttonSyncWithServer);
 		
@@ -152,7 +169,6 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 			@Override
 			public void onClick(View v) {
 				if(bayesServer != null){
-					//getAllSSOMachines(bayesServer.constructURLtoListAllMachines(), bayesServer.getName(), bayesServer.getPassword());
 					getAllScenarios(bayesServer.constructURLtoListAllScenarios(), bayesServer.getName(), bayesServer.getPassword());
 				}
 			}
@@ -189,6 +205,17 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		mLocalSensorList = (ListView) findViewById(R.id.listUsers);
 		adapterLocalSensors = new SensorAdapter(this, listLocalSensors);
 		mLocalSensorList.setAdapter(adapterLocalSensors);
+	    mLocalSensorList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				selectedLocalSensor = (LocalSensor) mLocalSensorList.getItemAtPosition(arg2);
+				 Log.d(TAG, "Selected sensor " + selectedLocalSensor.getName());
+				Intent i = new Intent(MainActivity.this, LocalSensorActivity.class);
+				startActivity(i);
+			}
+		});  
+	    
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 	    // Define the criteria how to select the locatioin provider -> use
 	    // default
@@ -208,6 +235,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	            sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
 	    sensorManager.registerListener(this,
 	            sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), SensorManager.SENSOR_DELAY_NORMAL);
+	   
 	}
 
 	private void initUsers() {
@@ -952,6 +980,49 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	    	accelometerSensor.updateData(actualTime, values);
 	    	adapterLocalSensors.notifyDataSetChanged(); 
 	   // }
+	}
+
+	public static void stopPush(){
+		Log.i(TAG, "stop pushing all data");
+		stopPushing = true;
+	}
+	
+	public static void pushData(final LocalSensor localSensor, Long id, String node) {
+		Log.d(TAG, "start pushing data to " +id + " , node " + node);
+		MainActivity.stopPushing = false;
+		final RestAPI rest = RestAPI.getInstance();
+		final String url = MainActivity.bayesServer.constructURLtoForScenarioAndNode(id, node);
+    	new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while(true){
+					Map<String, String> mapping = localSensor.getRuntimeData();
+					for(String key: mapping.keySet()){
+						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);	
+						nameValuePairs.add(new BasicNameValuePair("runtime_property", key ));
+						nameValuePairs.add(new BasicNameValuePair("value", mapping.get(key) ));
+						Log.i(TAG, "send runtime_property "+ key + " = " + mapping.get(key) );
+						rest.postScenarioAction(url, nameValuePairs, new PostResponseCallback(){
+							@Override
+							public void onPostSuccess() {
+								Log.i(TAG, "pushing data from" + localSensor.getName() + " was success");
+								Log.i(TAG, "pushed data " + localSensor.toString());
+							}});
+					}
+					try {
+						Thread.sleep(MainActivity.PUSH_PERIOD);
+						if(MainActivity.stopPushing ){
+							Log.i(TAG, "stop pushing");
+							return;
+						}
+					} catch (InterruptedException e) {
+						Log.e(TAG, e.getLocalizedMessage());
+					}
+				}
+			}
+		}).start();     
+		
 	}
 	
 
