@@ -88,13 +88,14 @@ public class Scenario implements Comparable{
 
 	@Override
     public String toString() {
-        return "RemoteScenarioStatus{" +
+        /*return "RemoteScenarioStatus{" +
                 "name='" + name + '\'' +
                 ", targetNode='" + targetNode + '\'' +
                 ", id=" + id +
                 ", scenarioStatus=" + scenarioStatus +
                 ", condition=" + condition +
-                '}';
+                '}';*/
+		return getName();
     }
 
 	@Override

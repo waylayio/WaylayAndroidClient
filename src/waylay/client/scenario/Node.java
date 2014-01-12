@@ -42,8 +42,9 @@ public class Node {
 
 	@Override
 	public String toString() {
-		String str = getStatesAsString();
-		return "Node " + name + " " +str;
+		//String str = getStatesAsString();
+		//return "Node " + name + " " +str;
+		return getName();
 	}
 
 	public String getStatesAsString() {

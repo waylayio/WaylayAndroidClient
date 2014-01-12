@@ -4,53 +4,34 @@
    <TableLayout android:layout_width="match_parent"
                  android:layout_height="wrap_content">
 
-       <TableRow>
-       <ImageView
-            android:id="@+id/selectedLocalSensorIcon"
-            android:layout_width="35dip"
-            android:layout_height="35dip"/>
-       
+       <TableRow>    
         <TextView
             android:id="@+id/selectedLocalSensorLabel"
 		    android:layout_width="wrap_content"
 		    android:layout_height="wrap_content"
-		    android:paddingLeft="40dp"
 		    android:text="Sensor" />
        </TableRow>
+       <TableRow>
+            <Spinner android:id="@+id/scenarioSpinner"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content" 
+                     android:animateLayoutChanges="true"/>
+        </TableRow>
        
         <TableRow>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="scenario ID" />
-
-        </TableRow>
-        <TableRow>
-            <EditText android:id="@+id/remoteScenarioID"
-                      android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:layout_weight="1"/>
+                      <Spinner android:id="@+id/nodeSpinner"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content" 
+                     android:animateLayoutChanges="true"/>
         </TableRow>
         
-        <TableRow>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="node name" />
 
-        </TableRow>
-        <TableRow>
-            <EditText android:id="@+id/remoteScenarioNode"
-                      android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:layout_weight="1"/>
-        </TableRow>
         
         <TableRow>
             <Button android:id="@+id/buttonPushLocalData"
                 	android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:text="Connect"
+                    android:text="Push data"
                     android:layout_weight="1"/>
         </TableRow>
         
