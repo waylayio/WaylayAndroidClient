@@ -62,7 +62,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	public static final String TAG = "Main Manager";
 
 
-	protected static final long PUSH_PERIOD = 10000;
+	protected static final long PUSH_PERIOD = 1000;
 
 	UserFactory userFactory;
 
@@ -974,12 +974,12 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		long actualTime = event.timestamp;
 		if(accelometerSensor.isTilt(event.values))
 			return;
-	    //if ((actualTime - velocitySensor.getLastUpdate()) * LocalSensor.NS2S > .02) {
+	    if ((actualTime - velocitySensor.getLastUpdate()) * LocalSensor.NS2S > .1) {
 	    	velocitySensor.updateData(actualTime, values);
 	    	adapterLocalSensors.notifyDataSetChanged();
 	    	accelometerSensor.updateData(actualTime, values);
 	    	adapterLocalSensors.notifyDataSetChanged(); 
-	   // }
+	    }
 	}
 
 	public static void stopPush(){

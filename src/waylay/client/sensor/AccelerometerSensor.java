@@ -46,7 +46,7 @@ public class AccelerometerSensor extends LocalSensor{
 	}
 	
 	public String getName(){
-		return "Accelerometer";
+		return "Acceleration";
 	}
 
 	@Override
