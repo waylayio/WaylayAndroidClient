@@ -56,13 +56,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 @SuppressWarnings("deprecation")
 public class MainActivity extends TabActivity implements LocationListener, SensorEventListener  {
 	public static final String TAG = "Main Manager";
 
 
-	protected static final long PUSH_PERIOD = 1000;
+	protected static final long PUSH_PERIOD = 1000; //push local sensor data in miliseconds
 
 	UserFactory userFactory;
 
@@ -144,6 +145,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 				stopPush();
 			}
 		});
+	
 		
 		/*mAddUserButton = (Button) findViewById(R.id.buttonAddUsers);
 		//mAddMachineButton = (Button) findViewById(R.id.buttonSyncWithServer);

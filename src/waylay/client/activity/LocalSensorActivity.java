@@ -25,8 +25,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
+
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -137,7 +136,15 @@ public class LocalSensorActivity extends Activity{
 						node.getSensorName().startsWith(MainActivity.selectedLocalSensor.getName())){
 					list.add(scenario);
 					break;
-				}		
+				}	//hack	
+				else if(node.getSensorName() != null && 
+						( (node.getSensorName().startsWith("Parking") && 
+								MainActivity.selectedLocalSensor.getName().startsWith("Location")) ||
+						(node.getSensorName().startsWith("Pharmacy") && 
+						MainActivity.selectedLocalSensor.getName().startsWith("Location")) ) )    {
+					list.add(scenario);
+					break;
+				}	//hack	
 			}
 		}
 		return list;
@@ -149,7 +156,14 @@ public class LocalSensorActivity extends Activity{
 			if(node.getSensorName() != null && 
 					node.getSensorName().startsWith(MainActivity.selectedLocalSensor.getName())){
 				list.add(node);
-			}		
+			}	//hack	
+			else if(node.getSensorName() != null && 
+					( (node.getSensorName().startsWith("Parking") && 
+							MainActivity.selectedLocalSensor.getName().startsWith("Location")) ||
+					(node.getSensorName().startsWith("Pharmacy") && 
+					MainActivity.selectedLocalSensor.getName().startsWith("Location")) ) )    {
+				list.add(node);
+			}	//hack		
 		}
 		return list;
 	}
