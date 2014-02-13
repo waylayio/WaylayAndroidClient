@@ -1,6 +1,7 @@
 package waylay.client.activity;
 
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.ActionMode.Callback;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -103,6 +105,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	protected static ArrayList<StorageUsage> storageUsage;
 	protected static DiskStats diskStats;
 	protected static BayesServer bayesServer = null;
+	protected static BayesServer selectedBayesServer = null;
 
 	public static LocalSensor selectedLocalSensor;
 
@@ -363,6 +366,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		bayesServer = new BayesServer("54.235.253.99/api", "admin", "admin");
 		if(listServers.size() == 0){
 			listServers.add(bayesServer);
+			listServers.add(new BayesServer("107.170.20.30/api", "admin", "admin"));
 		}
 		serverList = (ListView) findViewById(R.id.listSSO);
 		adapterSetup = new SetupAdapter(this, listServers);
@@ -372,9 +376,10 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		serverList.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
 					long arg3) {
-				startBrowser();
+				//startBrowser();
+				launchSSOSetup(position);
 			}
 		});
 
@@ -383,9 +388,18 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 				if (mSetupActionMode != null) {
 					return false;
 				}
-				mSetupActionMode = startActionMode(mSSOActionModeCallback);
-				view.setSelected(true);
-				return true;
+				try {
+					Method m = mSSOActionModeCallback.getClass().getMethod("setPosition", new Class[] {Integer.class});
+					m.invoke(mSSOActionModeCallback, new Object[] {new Integer(position)});
+					
+					mSetupActionMode = startActionMode(mSSOActionModeCallback);
+					view.setSelected(true);
+					return true;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return false;
+				}
 			}
 		});
 	}
@@ -535,7 +549,8 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		adapterMachines.notifyDataSetChanged(); 
 	}
 
-	protected void launchSSOSetup() {
+	protected void launchSSOSetup(int position) {
+		selectedBayesServer = (BayesServer) serverList.getItemAtPosition(position);
 		Intent i = new Intent(this, SetupActivity.class);
 		startActivity(i);
 	}
@@ -867,6 +882,10 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 
 
 	private ActionMode.Callback mSSOActionModeCallback = new ActionMode.Callback() {
+		int position = 0;
+		public void setPosition(int pos){
+			position = pos;
+		}
 
 		// Called when the action mode is created; startActionMode() was called
 		@Override
@@ -889,11 +908,12 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 			switch (item.getItemId()) {
 			case R.id.itemInfo:
-				launchInfo();
+				//launchInfo();
+				startBrowser();
 				mode.finish(); 
 				return true;
 			case R.id.itemEditSSO:
-				launchSSOSetup();
+				launchSSOSetup(position);
 				mode.finish(); 
 				return true;
 			default:
@@ -911,7 +931,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 
 	protected void startBrowser() {
 		Log.d(TAG, "startBrowser");
-		Uri marketUri = Uri.parse("http://"+bayesServer.getURL());
+		Uri marketUri = Uri.parse("http://"+bayesServer.constructURLForWebAP());
 		Intent marketIntent = new
 				Intent(Intent.ACTION_VIEW).setData(marketUri);
 		startActivity(marketIntent);
@@ -1050,6 +1070,12 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 			@Override
 			public void run() {
 				while(true){
+					if(!url.contains(MainActivity.bayesServer.getURL())){
+						stopPush();
+						ScenarioFactory.clear();
+						adapterScenarios.notifyDataSetChanged(); 
+						return;
+					}
 					Map<String, String> mapping = localSensor.getRuntimeData();
 					for(String key: mapping.keySet()){
 						List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);	

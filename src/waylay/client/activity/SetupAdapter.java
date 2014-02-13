@@ -39,7 +39,10 @@ public class SetupAdapter extends ArrayAdapter<BayesServer> {
 		textAddress.setText("");
 		// Change the icon for Windows and iPhone
 		BayesServer m = values.get(position);
-		imageView.setImageResource(R.drawable.tools);
+		if(m.equals(MainActivity.bayesServer))
+			imageView.setImageResource(R.drawable.network);
+		else
+			imageView.setImageResource(R.drawable.tools);
 		return rowView;
 	}
 }

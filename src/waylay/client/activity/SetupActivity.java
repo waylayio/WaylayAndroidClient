@@ -32,11 +32,11 @@ public class SetupActivity extends Activity{
 	        mSaveSSOButton = (Button) findViewById(R.id.buttonSaveSSOSetup);
 	        
   
-	        if(MainActivity.bayesServer != null){
-	        	Log.d(TAG, "selected existing SSO " + MainActivity.bayesServer);
-	        	mSSO_URL.setText((CharSequence) MainActivity.bayesServer.getURL());
-	        	mSSO_Name.setText((CharSequence) MainActivity.bayesServer.getName());
-	        	mSSO_Password.setText((CharSequence) MainActivity.bayesServer.getPassword());
+	        if(MainActivity.selectedBayesServer != null){
+	        	Log.d(TAG, "selected existing SSO " + MainActivity.selectedBayesServer);
+	        	mSSO_URL.setText((CharSequence) MainActivity.selectedBayesServer.getURL());
+	        	mSSO_Name.setText((CharSequence) MainActivity.selectedBayesServer.getName());
+	        	mSSO_Password.setText((CharSequence) MainActivity.selectedBayesServer.getPassword());
 	        	
 	        } else{
 	        	Log.d(TAG, "sso not selected, new sso will be created");
@@ -47,8 +47,6 @@ public class SetupActivity extends Activity{
 	            public void onClick(View v) {
 	                Log.d(TAG, "mSaveSSOButton clicked");
 	                MainActivity.bayesServer = getBayesServer();
-	                MainActivity.listServers.clear();
-					MainActivity.listServers.add(MainActivity.bayesServer);
 					MainActivity.adapterSetup.notifyDataSetChanged();	
 					finish();
 	            }
