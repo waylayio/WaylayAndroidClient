@@ -34,6 +34,7 @@ import android.app.TabActivity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -128,6 +129,7 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.main);
 
 		//initUsers();
@@ -363,10 +365,10 @@ public class MainActivity extends TabActivity implements LocationListener, Senso
 
 
 	private void initServer() {
-		bayesServer = new BayesServer("54.235.253.99/api", "admin", "admin");
+		bayesServer = new BayesServer("107.170.20.30/api", "admin", "admin");
 		if(listServers.size() == 0){
 			listServers.add(bayesServer);
-			listServers.add(new BayesServer("107.170.20.30/api", "admin", "admin"));
+			listServers.add(new BayesServer("54.235.253.99/api", "admin", "admin"));
 		}
 		serverList = (ListView) findViewById(R.id.listSSO);
 		adapterSetup = new SetupAdapter(this, listServers);
