@@ -30,18 +30,24 @@ public class ScenarioJSONParser {
 
 	public static Scenario parseScenario(String stringValue) throws JSONException {
 		JSONObject value = new JSONObject(stringValue);
-		JSONObject target = value.getJSONObject("target");
+		JSONObject target = value.has("target")? value.getJSONObject("target") : null;
+		String targetName = target == null? "target" : (String) target.get("name");
         String name = value.getString("name");
         String status = value.getString("status");
-        Number refreshRate = (Number) value.getLong("frequency");
+        Number refreshRate = value.has("frequency")? (Number) value.getLong("frequency") :10;
 
-        JSONObject conditionObj = value.getJSONObject("condition");
-        Condition condition = new Condition((Number)conditionObj.getLong("threshold"),
-                (Number) conditionObj.getLong("operator"), conditionObj.getString("stopState"));
+        JSONObject conditionObj = value.has("condition") ? value.getJSONObject("condition"): null;
+        Condition condition;
+        if(conditionObj != null){
+        	condition = new Condition((Number)conditionObj.getLong("threshold"),
+                    (Number) conditionObj.getLong("operator"), conditionObj.getString("stopState"));
+        }else {
+        	condition = new Condition(0.99, 1, "NOK");
+        }
         
         Long id = value.getLong("ID");
         Log.d(TAG, "getAllScenariosViaJSON got scenario "+id);
-        Scenario scenario = new Scenario(name, (String) target.get("name"), id, ScenarioStatus.getStatus(status),
+        Scenario scenario = new Scenario(name, targetName, id, ScenarioStatus.getStatus(status),
                 condition, refreshRate.intValue());
         JSONArray nodes = value.getJSONArray("nodes");
         for(int k=0; k < nodes.length(); k++){
