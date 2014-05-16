@@ -3,9 +3,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.10.+'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
     }
 }
+
+// see https://github.com/JakeWharton/sdk-manager-plugin
+// This Gradle plugin will manage these SDK dependencies for you automatically.
+apply plugin: 'android-sdk-manager'
 apply plugin: 'android'
 
 dependencies {
