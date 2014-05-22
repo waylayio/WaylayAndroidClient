@@ -26,13 +26,8 @@ public class WaylayApplication extends Application{
 
     private static final String TAG = "WaylayApplication";
 
-    private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
-    private static final Region ALL_ESTIMOTE_BEACONS = new Region("regionId", ESTIMOTE_PROXIMITY_UUID, null, null);
-
     public static final TimeUnit PUSH_TIMEUNIT = TimeUnit.SECONDS;
     public static final long PUSH_PERIOD = 1;
-
-    private BeaconManager beaconManager;
 
     public static List<BayesServer> servers = new ArrayList<BayesServer>();
     private static BayesServer selectedBayesServer = null;
@@ -46,27 +41,6 @@ public class WaylayApplication extends Application{
     public void onCreate() {
         super.onCreate();
         com.estimote.sdk.utils.L.enableDebugLogging(true);
-
-        beaconManager = new BeaconManager(getApplicationContext());
-
-        // Should be invoked in #onCreate.
-        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
-            @Override
-            public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
-                Log.d(TAG, "Ranged beacons: " + beacons);
-            }
-        });
-
-//        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-//            @Override public void onServiceReady() {
-//                try {
-//                    beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
-//                } catch (RemoteException e) {
-//                    Log.e(TAG, "Cannot start ranging", e);
-//                }
-//            }
-//        });
-
         initServer();
     }
 

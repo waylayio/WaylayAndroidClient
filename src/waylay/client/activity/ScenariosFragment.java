@@ -1,10 +1,8 @@
 package waylay.client.activity;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -120,7 +118,7 @@ public class ScenariosFragment extends BaseFragment {
             mListener = (LoadingListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement LoadingListener");
         }
     }
 
@@ -137,7 +135,7 @@ public class ScenariosFragment extends BaseFragment {
 
         public MyScenarioViewUserListener(Activity activity, Class c){
             this.activity = activity;
-            m_class = c;
+            this.m_class = c;
         }
 
         @Override
@@ -223,19 +221,18 @@ public class ScenariosFragment extends BaseFragment {
     public void getScenario(long scenarioId){
         Log.d(TAG, "refreshAllScenarios");
 
-        final ProgressDialog progress = ProgressDialog.show(getActivity(), "", "Loading. Please wait...", true);
+        mListener.startLoading();
 
         WaylayApplication.getRestService().getScenario(scenarioId, "", new GetResponseCallback<Scenario>() {
             @Override
             public void onDataReceived(Scenario scenario, boolean error, String message) {
-                Log.i(TAG, "Received response for scenarios: " + scenario);
-
+                Log.i(TAG, "Received response for scenario " + scenario);
                 if (!error) {
                     ScenarioFactory.addScenario(scenario);
-                    progress.dismiss();
+                    mListener.endLoading();
                     updateScenarios();
                 } else {
-                    progress.dismiss();
+                    mListener.endLoading();
                     alert(message);
                 }
             }
@@ -255,7 +252,7 @@ public class ScenariosFragment extends BaseFragment {
             WaylayApplication.getRestService().getScenarios("", new GetResponseCallback<List<Scenario>>() {
                 @Override
                 public void onDataReceived(List<Scenario> scenarios, boolean error, String message) {
-                    Log.i(TAG, "Received response for scenarios: " + scenarios.size());
+                    Log.i(TAG, "Received response with " + scenarios.size() + " scenarios");
 
                     if (!error) {
                         ScenarioFactory.addAll(scenarios);

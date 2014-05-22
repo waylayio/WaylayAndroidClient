@@ -146,8 +146,8 @@ public class LocalSensorActivity extends BaseActivity {
 		return list;
 	}
 
-	protected ArrayList<Node> filterNodes(ArrayList<Node> nodes) {
-		ArrayList<Node> list = new ArrayList<Node>();
+	protected List<Node> filterNodes(List<Node> nodes) {
+		List<Node> list = new ArrayList<Node>();
 		for(Node node : nodes){
 			if(node.getSensorName() != null && 
 					node.getSensorName().startsWith(SensorsFragement.selectedLocalSensor.getName())){
