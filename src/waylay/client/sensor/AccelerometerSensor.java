@@ -10,7 +10,7 @@ import waylay.client.statistcs.MeanFilter;
 import waylay.client.statistcs.SimpleLinearAcceleration;
 import android.hardware.SensorManager;
 
-public class AccelerometerSensor extends LocalSensor{
+public class AccelerometerSensor extends AbstractLocalSensor {
 	private static final float TILT_THRESHOLD = 1.05f;
 	private SimpleLinearAcceleration simpleLinearAcceleration;
 	private float acceleration = -1;
@@ -23,17 +23,14 @@ public class AccelerometerSensor extends LocalSensor{
 	public AccelerometerSensor(boolean compensate) {
 		super();
 		if(compensate){
-		    LowPassFilter lpfAcceleration = null;
-		    MeanFilter meanFilterAcceleration = null;
 		    float accelerationLPFAlpha = 0.4f;
 		    int accelerationMeanFilterWindow = 10;
-			lpfAcceleration = new LPFWikipedia();
+            LowPassFilter lpfAcceleration = new LPFWikipedia();
 			lpfAcceleration.setAlphaStatic(false);
 			lpfAcceleration.setAlpha(accelerationLPFAlpha);
-	        meanFilterAcceleration = new MeanFilter();
+            MeanFilter meanFilterAcceleration = new MeanFilter();
 	        meanFilterAcceleration.setWindowSize(accelerationMeanFilterWindow);
 			simpleLinearAcceleration = new SimpleLinearAcceleration(lpfAcceleration, meanFilterAcceleration);
-			
 		}
 	}
 

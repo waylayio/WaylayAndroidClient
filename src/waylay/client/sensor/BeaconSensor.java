@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class BeaconSensor extends LocalSensor{
+public class BeaconSensor extends AbstractLocalSensor {
 
     // TODO we probably want to store the proximity as well
     private Set<String> beacons = new HashSet<String>();

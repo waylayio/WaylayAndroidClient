@@ -9,7 +9,7 @@ import waylay.client.statistcs.MeanFilter;
 import waylay.client.statistcs.SimpleLinearAcceleration;
 
 
-public class ForceSensor extends LocalSensor{
+public class ForceSensor extends AbstractLocalSensor {
 	private SimpleLinearAcceleration simpleLinearAcceleration;
     
 	private float x = -1;

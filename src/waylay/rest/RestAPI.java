@@ -7,7 +7,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 
-import waylay.client.data.MachineInfo;
 import waylay.client.data.BayesServer;
 import waylay.client.scenario.Scenario;
 
@@ -25,43 +24,6 @@ public class RestAPI{
     public RestAPI(BayesServer server) {
         this.server = server;
     }
-
-    /**
-	 * Request a Scenarios from the REST servers.
-	 * @param callback Callback to execute when the profile is available.
-	 */
-	public void getMachines(String filter, final GetResponseCallback callback){
-
-		String url = constructURLtoListAllMachines() + filter;
-		Log.d(TAG, "getMachines with url "+ url);
-
-		new GetTask(url, server.getName(), server.getPassword(), new RestTaskCallback (){
-			@Override
-			public void onTaskComplete(String response){
-				//parse response
-				Log.i(TAG, response);
-				boolean error = false;
-				String message = null;
-				ArrayList<Machine> machines = new ArrayList<Machine>();
-
-				if(GetTask.NO_RESULT.equals(response)){
-					error = true;
-					message = GetTask.getError();
-				} else {
-
-					try {
-						machines = Machine.getSSOMachinefromJSON(response);
-					} catch (JSONException e) {
-						error = true;
-						message = e.getMessage();
-						Log.e(TAG, message);
-					}
-				}
-				callback.onDataReceived(machines, error, message);
-			}
-		}).execute("");
-
-	}
 
 	public void postScenarioAction(Long scenarioId, String action, final PostResponseCallback callback){
         String url = constructURLtoForScenario(scenarioId);
@@ -121,7 +83,7 @@ public class RestAPI{
 				Log.i(TAG, response);
 				boolean error = false;
 				String message = null;
-				ArrayList<Scenario> scenarios = new ArrayList<Scenario>() ;
+				List<Scenario> scenarios = new ArrayList<Scenario>() ;
 
 				if(GetTask.NO_RESULT.equals(response)){
 					error = true;
@@ -173,87 +135,9 @@ public class RestAPI{
 
 	}
 
-	/**
-	 * Request a SSOMachines from the REST servers.
-	 * @param callback Callback to execute when the profile is available.
-	 */
-	public void getIPAddressesForMachine(final MachineInfo machine, String restUrl, String name, String password, final GetResponseCallback<Void> callback){
-
-		String call1 = restUrl + machine.getGuid();
-		Log.d(TAG, "getIPAddressesForMachine for machine "+ machine.getName()); 
-		new GetTask(call1, name, password, new RestTaskCallback (){
-			@Override
-			public void onTaskComplete(String response){
-				Log.i(TAG, response);
-				boolean error = false;
-				String message = null;
-
-				if(GetTask.NO_RESULT.equals(response)){
-					error = true;
-					message = GetTask.getError();
-				} else {
-					try {
-						machine.setIpAddress(Machine.getIPfromJSON(response));
-					} catch (JSONException e) {
-						error = true;
-						message = e.getMessage();
-						Log.e(TAG, message);
-					}
-				}
-				callback.onDataReceived(null, error, message);
-			}
-		}).execute("");
-	}
-
-
-//	public void getDashboardData(final Dashboard dashboard, final GetResponseCallback<Dashboard> callback){
-//        final String url = constructURLtoGetDashboardData();
-//		Log.d(TAG, "getDashboardData with url "+ url);
-//        // TODO why the name-pass both in url and task?
-//		new GetTask(url, server.getName(), server.getPassword(), new RestTaskCallback (){
-//			@Override
-//			public void onTaskComplete(String response){
-//				//parse response
-//				Log.i(TAG, response);
-//				boolean error = false;
-//				String message = null;
-//				if(GetTask.NO_RESULT.equals(response)){
-//					error = true;
-//					message = GetTask.getError();
-//				} else {
-//					try {
-//						dashboard.parseString(response);
-//					} catch (JSONException e) {
-//						error = true;
-//						message = e.getMessage();
-//						Log.e(TAG, message);
-//					}
-//				}
-//				callback.onDataReceived(dashboard, error, message);
-//			}
-//		}).execute("");
-//
-//	}
-
-	/**
-	 * Submit call to to the servers.
-	 * @param callback The callback to execute when submission status is available.
-	 */
-	private void postUserProfile(String restUrl, String requestBody, ArrayList<Machine> machines, final PostResponseCallback callback){
-
-	}
 
     private String apiBase() {
         return  "http://" + server.getHost() + "/api";
-    }
-
-    private String apiBaseAuthenticated() {
-        return  "http://" + server.getName() + ":" + server.getPassword() + "@" + server.getHost() + "/api";
-    }
-
-    private String constructURLtoListAllMachines(){
-        return apiBaseAuthenticated() + "/appserver/rest/cloud_api_machine/list";
-
     }
 
     private String constructURLtoListAllScenarios(){
@@ -267,16 +151,6 @@ public class RestAPI{
     private String constructURLtoForScenarioAndNode(Long id, String node){
         return constructURLtoForScenario(id) + node;
     }
-
-//    private String constructURLtoGetIpAddress(){
-//        return apiBaseAuthenticated() + "/appserver/rest/cloud_api_machine/getPublicIpaddress?machineguid=";
-//
-//    }
-//
-//    private String constructURLtoGetDashboardData(){
-//        return apiBaseAuthenticated() + "/appserver/rest/cloud_api_cmc/getDashboard";
-//
-//    }
 
 }
 

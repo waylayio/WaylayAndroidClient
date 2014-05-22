@@ -2,7 +2,7 @@
 <resources>
 
     <string name="hello">Hello World</string>
-    <string name="app_name"></string>
+    <string name="app_name">Waylay test</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

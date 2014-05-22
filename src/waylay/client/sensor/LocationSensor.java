@@ -3,7 +3,7 @@ package waylay.client.sensor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LocationSensor extends LocalSensor{
+public class LocationSensor extends AbstractLocalSensor {
 	private double latitude = -1.0;
 	private double longitude = -1.0;
 	

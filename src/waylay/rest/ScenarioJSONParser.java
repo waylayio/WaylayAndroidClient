@@ -1,6 +1,7 @@
 package waylay.rest;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,7 +17,7 @@ import android.util.Log;
 public class ScenarioJSONParser {
 	public static final String TAG = "Scenario";
 	
-	public static ArrayList<Scenario> getAllScenariosViaJSON(String jsonString) throws Exception {
+	public static List<Scenario> getAllScenariosViaJSON(String jsonString) throws Exception {
 		Log.d(TAG, "getAllScenariosViaJSON");
 		ArrayList<Scenario> scenarios = new ArrayList<Scenario>();
         JSONArray array = new JSONArray(jsonString);

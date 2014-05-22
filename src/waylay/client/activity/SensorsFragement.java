@@ -2,12 +2,6 @@ package waylay.client.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -19,13 +13,7 @@ import android.widget.ListView;
 
 import com.waylay.client.R;
 
-import java.util.ArrayList;
-
-import waylay.client.sensor.AccelerometerSensor;
-import waylay.client.sensor.BeaconSensor;
-import waylay.client.sensor.ForceSensor;
-import waylay.client.sensor.LocalSensor;
-import waylay.client.sensor.LocationSensor;
+import waylay.client.sensor.AbstractLocalSensor;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,8 +39,10 @@ public class SensorsFragement extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private SensorAdapter adapterLocalSensors;
+    public static AbstractLocalSensor selectedLocalSensor;
 
-    ListView mLocalSensorList;
+    private ListView mLocalSensorList;
 
 
 
@@ -92,13 +82,16 @@ public class SensorsFragement extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sensors, container, false);
 
+        this.adapterLocalSensors = new SensorAdapter(getActivity(), MainActivity.listLocalSensors);
+
         mLocalSensorList = (ListView) view.findViewById(R.id.listUsers);
-        mLocalSensorList.setAdapter(MainActivity.adapterLocalSensors);
+        mLocalSensorList.setAdapter(adapterLocalSensors);
         mLocalSensorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MainActivity.selectedLocalSensor = (LocalSensor) mLocalSensorList.getItemAtPosition(position);
-                Log.d(TAG, "Selected sensor " + MainActivity.selectedLocalSensor.getName());
+                AbstractLocalSensor sensor = (AbstractLocalSensor) mLocalSensorList.getItemAtPosition(position);
+                selectedLocalSensor = sensor;
+                Log.d(TAG, "Selected sensor " + sensor.getName());
                 Intent i = new Intent(getActivity(), LocalSensorActivity.class);
                 startActivity(i);
             }
@@ -136,6 +129,10 @@ public class SensorsFragement extends Fragment {
      */
     public interface OnFragmentInteractionListener {
 
+    }
+
+    public void update(){
+        adapterLocalSensors.notifyDataSetChanged();
     }
 
 

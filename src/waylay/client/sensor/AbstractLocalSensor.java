@@ -3,10 +3,10 @@ package waylay.client.sensor;
 import java.util.Map;
 
 
-public abstract class LocalSensor {
+public abstract class AbstractLocalSensor implements IdentifiedSensor {
 	public abstract String getStatus();
-	public abstract int getId();
-	public abstract String getName();
+
+    public abstract String getName();
 	public static final float NS2S = 1.0f / 1000000000.0f;
 
 	public int hashCode() {
@@ -20,7 +20,7 @@ public abstract class LocalSensor {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		LocationSensor other = (LocationSensor) obj;
+        IdentifiedSensor other = (IdentifiedSensor) obj;
 		return getId() == other.getId();
 	}
 	public abstract Map<String, String> getRuntimeData();

@@ -4,17 +4,11 @@ package waylay.client.activity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 
 import waylay.client.WaylayApplication;
 import waylay.client.scenario.Node;
 import waylay.client.scenario.Scenario;
-import waylay.client.sensor.LocalSensor;
-import waylay.rest.PostResponseCallback;
-import waylay.rest.RestAPI;
+import waylay.client.sensor.AbstractLocalSensor;
 
 import com.waylay.client.R;
 
@@ -31,7 +25,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class LocalSensorActivity extends Activity{
+public class LocalSensorActivity extends BaseActivity {
 
 	public static final String TAG = "LocalSensorActivity";
 
@@ -39,11 +33,11 @@ public class LocalSensorActivity extends Activity{
 	private Spinner scenarioSpinner;
 	private Spinner nodeSpinner;
 	private TextView mSelectedSensor;
-	private LocalSensor localSensor;
+	private AbstractLocalSensor localSensor;
 	private String selectedNode;
 	private Scenario scenario;
-	private ArrayList<Node> listNodes = new ArrayList<Node>();
-	private ArrayList<Scenario> scenarios = new ArrayList<Scenario>();
+	private List<Node> listNodes = new ArrayList<Node>();
+	private List<Scenario> scenarios = new ArrayList<Scenario>();
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);  
@@ -51,14 +45,13 @@ public class LocalSensorActivity extends Activity{
 		setContentView(R.layout.local_sensor);
 		scenarios = filterScenarios(ScenarioFactory.getsScenarios());
 
-		mConnectButton = (Button) findViewById(R.id.buttonPushLocalData);
-		scenarioSpinner = (Spinner) findViewById(R.id.scenarioSpinner);
-		nodeSpinner = (Spinner) findViewById(R.id.nodeSpinner);
-		mSelectedSensor = (TextView) findViewById(R.id.selectedLocalSensorLabel);
-		localSensor = MainActivity.selectedLocalSensor;
+		mConnectButton = viewById(R.id.buttonPushLocalData);
+		scenarioSpinner = viewById(R.id.scenarioSpinner);
+		nodeSpinner = viewById(R.id.nodeSpinner);
+		mSelectedSensor = viewById(R.id.selectedLocalSensorLabel);
+		localSensor = SensorsFragement.selectedLocalSensor;
 
-		ArrayAdapter<Scenario> adapter;
-		adapter = new ArrayAdapter<Scenario>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, scenarios);
+		ArrayAdapter<Scenario> adapter = new ArrayAdapter<Scenario>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, scenarios);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
 		scenarioSpinner.setAdapter(adapter);
 		
@@ -76,8 +69,7 @@ public class LocalSensorActivity extends Activity{
 				int i = nodeSpinner.getSelectedItemPosition();
 				Node node = listNodes.get(i);
 				selectedNode =  String.valueOf(node.getName());
-				mSelectedSensor.setText("Scenario[" + scenario.getId()+ "], " + "Node[" + selectedNode+ "] " +
-				(CharSequence) MainActivity.selectedLocalSensor.getName());				
+				mSelectedSensor.setText("Scenario[" + scenario.getId()+ "], " + "Node[" + selectedNode+ "] " + SensorsFragement.selectedLocalSensor.getName());
 			}
 
 			@Override
@@ -100,7 +92,7 @@ public class LocalSensorActivity extends Activity{
 					adapterNode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
 					nodeSpinner.setAdapter(adapterNode);
 					adapterNode.notifyDataSetChanged();
-					mSelectedSensor.setText("Scenario[" + scenario.getId()+ "] " + (CharSequence) MainActivity.selectedLocalSensor.getName());				
+					mSelectedSensor.setText("Scenario[" + scenario.getId()+ "] " + SensorsFragement.selectedLocalSensor.getName());
 				}	
 			}
 
@@ -110,9 +102,9 @@ public class LocalSensorActivity extends Activity{
 			}
 		});
 
-        if(MainActivity.selectedLocalSensor != null){
-        	Log.d(TAG, "selected sensor " + MainActivity.selectedLocalSensor);
-        	mSelectedSensor.setText((CharSequence) MainActivity.selectedLocalSensor.getName());
+        if(SensorsFragement.selectedLocalSensor != null){
+        	Log.d(TAG, "selected sensor " + SensorsFragement.selectedLocalSensor);
+        	mSelectedSensor.setText((CharSequence) SensorsFragement.selectedLocalSensor.getName());
         } else{
         	Log.e(TAG, "sensor not selected");
         	return;
@@ -135,17 +127,17 @@ public class LocalSensorActivity extends Activity{
 		for(Scenario scenario : _scenarios ){
 			for(Node node : scenario.getNodes()){
 				if(node.getSensorName() != null && 
-						node.getSensorName().startsWith(MainActivity.selectedLocalSensor.getName())){
+						node.getSensorName().startsWith(SensorsFragement.selectedLocalSensor.getName())){
 					list.add(scenario);
 					break;
 				}	//TODO hack, later ask for runtime properties from the REST call 	
 				else if(node.getSensorName() != null && 
-						( (node.getSensorName().startsWith("Parking") && 
-								MainActivity.selectedLocalSensor.getName().startsWith("Location")) ||
-						(node.getSensorName().startsWith("Pharmacy") && 
-						MainActivity.selectedLocalSensor.getName().startsWith("Location"))  ||
-						(node.getSensorName().startsWith("Tree") && 
-						MainActivity.selectedLocalSensor.getName().startsWith("Location")) ) )    {
+						( (node.getSensorName().startsWith("Parking") &&
+                                SensorsFragement.selectedLocalSensor.getName().startsWith("Location")) ||
+						(node.getSensorName().startsWith("Pharmacy") &&
+                                SensorsFragement.selectedLocalSensor.getName().startsWith("Location"))  ||
+						(node.getSensorName().startsWith("Tree") &&
+                                SensorsFragement.selectedLocalSensor.getName().startsWith("Location")) ) )    {
 					list.add(scenario);
 					break;
 				}	//hack	
@@ -158,16 +150,16 @@ public class LocalSensorActivity extends Activity{
 		ArrayList<Node> list = new ArrayList<Node>();
 		for(Node node : nodes){
 			if(node.getSensorName() != null && 
-					node.getSensorName().startsWith(MainActivity.selectedLocalSensor.getName())){
+					node.getSensorName().startsWith(SensorsFragement.selectedLocalSensor.getName())){
 				list.add(node);
 			}	//TODO hack	
 			else if(node.getSensorName() != null && 
-					( (node.getSensorName().startsWith("Parking") && 
-							MainActivity.selectedLocalSensor.getName().startsWith("Location")) ||
-					(node.getSensorName().startsWith("Pharmacy") && 
-					MainActivity.selectedLocalSensor.getName().startsWith("Location")) ||
-					(node.getSensorName().startsWith("Tree") && 
-					MainActivity.selectedLocalSensor.getName().startsWith("Location"))) )    {
+					( (node.getSensorName().startsWith("Parking") &&
+                            SensorsFragement.selectedLocalSensor.getName().startsWith("Location")) ||
+					(node.getSensorName().startsWith("Pharmacy") &&
+                            SensorsFragement.selectedLocalSensor.getName().startsWith("Location")) ||
+					(node.getSensorName().startsWith("Tree") &&
+                            SensorsFragement.selectedLocalSensor.getName().startsWith("Location"))) )    {
 				list.add(node);
 			}	//hack		
 		}

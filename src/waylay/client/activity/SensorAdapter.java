@@ -1,8 +1,8 @@
 package waylay.client.activity;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import waylay.client.sensor.LocalSensor;
+import waylay.client.sensor.AbstractLocalSensor;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,12 +14,12 @@ import android.widget.TextView;
 
 import com.waylay.client.R;
 
-public class SensorAdapter extends ArrayAdapter<LocalSensor> {
+public class SensorAdapter extends ArrayAdapter<AbstractLocalSensor> {
 	
 	private final Context context;
-	private final ArrayList<LocalSensor> values;
+	private final List<AbstractLocalSensor> values;
 
-	public SensorAdapter(Context context, ArrayList<LocalSensor> values) {
+	public SensorAdapter(Context context, List<AbstractLocalSensor> values) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
@@ -37,7 +37,7 @@ public class SensorAdapter extends ArrayAdapter<LocalSensor> {
 		textHost.setText(values.get(position).getName());
 		textStatus.setText(values.get(position).toString());
 		textAddress.setText(values.get(position).getStatus());
-		LocalSensor m = values.get(position);
+		AbstractLocalSensor m = values.get(position);
 		imageView.setImageResource(R.drawable.sensor);
 		return rowView;
 	}

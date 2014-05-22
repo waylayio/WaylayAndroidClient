@@ -16,6 +16,8 @@ public class SetupActivity extends Activity{
 
     public static final String TAG = "SetupActivity";
 
+    public static final int RESULT_CHANGED = 1;
+
     private EditText mSSO_URL;
     private EditText mSSO_Password;
     private EditText mSSO_Name;
@@ -46,6 +48,7 @@ public class SetupActivity extends Activity{
             public void onClick(View v) {
                 BayesServer server = getBayesServer();
                 WaylayApplication.selectServer(server);
+                setResult(RESULT_CHANGED);
                 finish();
             }
         });

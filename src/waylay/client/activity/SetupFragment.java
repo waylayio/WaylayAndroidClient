@@ -99,10 +99,8 @@ public class SetupFragment extends Fragment {
         serverList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-                                    long arg3) {
-                //startBrowser();
-                launchSSOSetup(position);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectServer((BayesServer) serverList.getItemAtPosition(position));
             }
         });
 
@@ -112,9 +110,7 @@ public class SetupFragment extends Fragment {
                     return false;
                 }
                 try {
-                    Method m = mSSOActionModeCallback.getClass().getMethod("setPosition", new Class[] {Integer.class});
-                    m.invoke(mSSOActionModeCallback, new Object[] {new Integer(position)});
-
+                    mSSOActionModeCallback.setPosition(position);
                     mSetupActionMode = getActivity().startActionMode(mSSOActionModeCallback);
                     view.setSelected(true);
                     return true;
@@ -139,11 +135,16 @@ public class SetupFragment extends Fragment {
         return view;
     }
 
+    private void selectServer(BayesServer server) {
+        WaylayApplication.selectServer(server);
+        adapterSetup.notifyDataSetChanged();
+        mListener.onServerChange();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         adapterSetup.notifyDataSetChanged();
-        mListener.onServerChange();
     }
 
     @Override
@@ -186,52 +187,7 @@ public class SetupFragment extends Fragment {
 		startActivity(i);
 	}
 
-    private ActionMode.Callback mSSOActionModeCallback = new ActionMode.Callback() {
-		int position = 0;
-		public void setPosition(int pos){
-			position = pos;
-		}
-
-		// Called when the action mode is created; startActionMode() was called
-		@Override
-		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-			// Inflate a menu resource providing context menu items
-			MenuInflater inflater = mode.getMenuInflater();
-			inflater.inflate(R.layout.menu_sso, menu);
-			return true;
-		}
-
-		// Called each time the action mode is shown. Always called after onCreateActionMode, but
-		// may be called multiple times if the mode is invalidated.
-		@Override
-		public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-			return false; // Return false if nothing is done
-		}
-
-		// Called when the user selects a contextual menu item
-		@Override
-		public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-			switch (item.getItemId()) {
-			case R.id.itemInfo:
-				//launchInfo();
-				startBrowser();
-				mode.finish();
-				return true;
-			case R.id.itemEditSSO:
-				launchSSOSetup(position);
-				mode.finish();
-				return true;
-			default:
-				return false;
-			}
-		}
-
-		// Called when the user exits the action mode
-		@Override
-		public void onDestroyActionMode(ActionMode mode) {
-			mSetupActionMode = null;
-		}
-	};
+    private ActionModeCallback mSSOActionModeCallback = new ActionModeCallback();
 
 
 
@@ -244,4 +200,51 @@ public class SetupFragment extends Fragment {
 
     }
 
+    private class ActionModeCallback implements ActionMode.Callback {
+
+        int position = 0;
+
+        public void setPosition(Integer pos){
+            position = pos;
+        }
+
+        // Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.layout.menu_sso, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+            case R.id.itemInfo:
+                startBrowser();
+                mode.finish();
+                return true;
+            case R.id.itemEditSSO:
+                launchSSOSetup(position);
+                mode.finish();
+                return true;
+            default:
+                return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mSetupActionMode = null;
+        }
+    }
 }

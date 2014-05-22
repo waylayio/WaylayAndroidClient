@@ -8,22 +8,17 @@ import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import waylay.client.activity.ScenarioFactory;
 import waylay.client.data.BayesServer;
-import waylay.client.sensor.LocalSensor;
+import waylay.client.sensor.AbstractLocalSensor;
 import waylay.rest.PostResponseCallback;
 import waylay.rest.RestAPI;
 
@@ -79,7 +74,7 @@ public class WaylayApplication extends Application{
         return new RestAPI(selectedBayesServer);
     }
 
-    public static void startPushing(final LocalSensor localSensor, final Long id, final String node) {
+    public static void startPushing(final AbstractLocalSensor localSensor, final Long id, final String node) {
         Log.d(TAG, "start pushing data to " +id + " , node " + node);
         pushers.add(executorService.scheduleWithFixedDelay(new Pusher(id, node, localSensor), 0, PUSH_PERIOD, PUSH_TIMEUNIT));
     }
@@ -114,12 +109,12 @@ public class WaylayApplication extends Application{
 
         private final long scenarioId;
         private final String node;
-        private final LocalSensor sensor;
+        private final AbstractLocalSensor sensor;
 
         // keep this around as we don' want to suddenly change servers
         private final RestAPI service;
 
-        private Pusher(final long scenarioId, final String node, final LocalSensor sensor) {
+        private Pusher(final long scenarioId, final String node, final AbstractLocalSensor sensor) {
             this.scenarioId = scenarioId;
             this.node = node;
             this.sensor = sensor;
