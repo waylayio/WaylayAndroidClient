@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 
 import waylay.client.data.MachineInfo;
@@ -17,31 +18,24 @@ import android.util.Log;
  * Entry point into the API.
  */
 public class RestAPI{   
-	protected static final String TAG = "REST API";
+	protected static final String TAG = "RestAPI";
 
-	private static RestAPI instance = null;
+	private final BayesServer server;
 
-	static {
-		instance = new RestAPI();
-	}
+    public RestAPI(BayesServer server) {
+        this.server = server;
+    }
 
-	public static RestAPI getInstance() {
-		return instance;
-	}
-
-	private RestAPI(){}
-
-
-	/**
-	 * Request a Scenarios from the REST server.
+    /**
+	 * Request a Scenarios from the REST servers.
 	 * @param callback Callback to execute when the profile is available.
 	 */
-	public void getMachines(String restUrl, String name, String filter, String password, final GetResponseCallback callback){
+	public void getMachines(String filter, final GetResponseCallback callback){
 
-		String call1 = restUrl + filter;
-		Log.d(TAG, "getMachines with url "+ call1);
+		String url = constructURLtoListAllMachines() + filter;
+		Log.d(TAG, "getMachines with url "+ url);
 
-		new GetTask(call1, name, password, new RestTaskCallback (){
+		new GetTask(url, server.getName(), server.getPassword(), new RestTaskCallback (){
 			@Override
 			public void onTaskComplete(String response){
 				//parse response
@@ -69,16 +63,43 @@ public class RestAPI{
 
 	}
 
-	public void postScenarioAction(String restUrl, List<NameValuePair> nameValuePairs, final PostResponseCallback callback){
-		new PostTask(restUrl, nameValuePairs, new RestTaskCallback(){
+	public void postScenarioAction(Long scenarioId, String action, final PostResponseCallback callback){
+        String url = constructURLtoForScenario(scenarioId);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+        nameValuePairs.add(new BasicNameValuePair("action", action));
+		new PostTask(url, nameValuePairs, new RestTaskCallback(){
 			public void onTaskComplete(String response){
 				callback.onPostSuccess();
 			}
 		}).execute("");
 	}
+
+    public void postScenarioNodeValueAction(Long scenarioId, String node, String property, String value, final PostResponseCallback callback){
+        String url = constructURLtoForScenarioAndNode(scenarioId, node);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+        nameValuePairs.add(new BasicNameValuePair("runtime_property", property ));
+        nameValuePairs.add(new BasicNameValuePair("value", value ));
+        new PostTask(url, nameValuePairs, new RestTaskCallback(){
+            public void onTaskComplete(String response){
+                callback.onPostSuccess();
+            }
+        }).execute("");
+    }
+
+    public void postScenarioNodeAction(Long scenarioId, String node, String action, final PostResponseCallback callback){
+        String url = constructURLtoForScenarioAndNode(scenarioId, node);
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+        nameValuePairs.add(new BasicNameValuePair("action", action));
+        new PostTask(url, nameValuePairs, new RestTaskCallback(){
+            public void onTaskComplete(String response){
+                callback.onPostSuccess();
+            }
+        }).execute("");
+    }
 	
-	public void deleteScenarioAction(String restUrl, final PostResponseCallback callback){
-		new DeleteTask(restUrl, new RestTaskCallback(){
+	public void deleteScenarioAction(long scenarioId, final PostResponseCallback callback){
+        String url = constructURLtoForScenario(scenarioId);
+		new DeleteTask(url, new RestTaskCallback(){
 			public void onTaskComplete(String response){
 				callback.onPostSuccess();
 			}
@@ -86,15 +107,14 @@ public class RestAPI{
 	}
 	
 	/**
-	 * Request a Scenarios from the REST server.
+	 * Request a Scenarios from the REST servers.
 	 * @param callback Callback to execute when the profile is available.
 	 */
-	public void getScenarios(String restUrl, String name, String filter, String password, final GetResponseCallback callback){
+	public void getScenarios(String filter, final GetResponseCallback<List<Scenario>> callback){
+		String url = constructURLtoListAllScenarios() + filter;
+		Log.d(TAG, "getScenarios with url " + url);
 
-		String call1 = restUrl + filter;
-		Log.d(TAG, "getScenarios with url "+ call1);
-
-		new GetTask(call1, name, password, new RestTaskCallback (){
+		new GetTask(url, server.getName(), server.getPassword(), new RestTaskCallback (){
 			@Override
 			public void onTaskComplete(String response){
 				//parse response
@@ -122,43 +142,42 @@ public class RestAPI{
 
 	}
 	
-	public void getScenario(String restUrl, String name, String filter, String password, final GetResponseCallback callback){
+	public void getScenario(long scenarioId, String filter, final GetResponseCallback<Scenario> callback){
+		String url = constructURLtoForScenario(scenarioId) + filter;
+		Log.d(TAG, "getScenarios with url "+ url);
 
-		String call1 = restUrl + filter;
-		Log.d(TAG, "getScenarios with url "+ call1);
-
-		new GetTask(call1, name, password, new RestTaskCallback (){
+		new GetTask(url, server.getName(), server.getPassword(), new RestTaskCallback (){
 			@Override
 			public void onTaskComplete(String response){
 				//parse response
 				Log.i(TAG, response);
 				boolean error = false;
 				String message = null;
-				ArrayList<Scenario> scenarios = new ArrayList<Scenario>() ;
 
+                Scenario scenario = null;
 				if(GetTask.NO_RESULT.equals(response)){
 					error = true;
 					message = GetTask.getError();
 				} else {
 					try {
-						scenarios.add(ScenarioJSONParser.parseScenario(response));
+                        scenario = ScenarioJSONParser.parseScenario(response);
 					} catch (Exception e) {
 						error = true;
 						message = e.getMessage();
 						Log.e(TAG, message);
 					}
 				}
-				callback.onDataReceived(scenarios, error, message);
+				callback.onDataReceived(scenario, error, message);
 			}
 		}).execute("");
 
 	}
 
 	/**
-	 * Request a SSOMachines from the REST server.
+	 * Request a SSOMachines from the REST servers.
 	 * @param callback Callback to execute when the profile is available.
 	 */
-	public void getIPAddressesForMachine(final MachineInfo machine, String restUrl, String name, String password, final GetResponseCallback callback){
+	public void getIPAddressesForMachine(final MachineInfo machine, String restUrl, String name, String password, final GetResponseCallback<Void> callback){
 
 		String call1 = restUrl + machine.getGuid();
 		Log.d(TAG, "getIPAddressesForMachine for machine "+ machine.getName()); 
@@ -181,49 +200,84 @@ public class RestAPI{
 						Log.e(TAG, message);
 					}
 				}
-				callback.onUpdate(error, message);
+				callback.onDataReceived(null, error, message);
 			}
 		}).execute("");
 	}
 
 
-	public void getDashboardData(String restUrl, String name, String password, final Dashboard dashboard, final GetResponseCallback callback){
-
-		String call1 = restUrl;
-		Log.d(TAG, "getDashboardData with url "+ call1);
-
-		new GetTask(call1, name, password, new RestTaskCallback (){
-			@Override
-			public void onTaskComplete(String response){
-				//parse response
-				Log.i(TAG, response);
-				boolean error = false;
-				String message = null;
-				if(GetTask.NO_RESULT.equals(response)){
-					error = true;
-					message = GetTask.getError();
-				} else {
-					try {
-						dashboard.parseString(response);
-					} catch (JSONException e) {
-						error = true;
-						message = e.getMessage();
-						Log.e(TAG, message);
-					}
-				}
-				callback.onDashboardReceived(dashboard, error, message);
-			}
-		}).execute("");
-
-	}
+//	public void getDashboardData(final Dashboard dashboard, final GetResponseCallback<Dashboard> callback){
+//        final String url = constructURLtoGetDashboardData();
+//		Log.d(TAG, "getDashboardData with url "+ url);
+//        // TODO why the name-pass both in url and task?
+//		new GetTask(url, server.getName(), server.getPassword(), new RestTaskCallback (){
+//			@Override
+//			public void onTaskComplete(String response){
+//				//parse response
+//				Log.i(TAG, response);
+//				boolean error = false;
+//				String message = null;
+//				if(GetTask.NO_RESULT.equals(response)){
+//					error = true;
+//					message = GetTask.getError();
+//				} else {
+//					try {
+//						dashboard.parseString(response);
+//					} catch (JSONException e) {
+//						error = true;
+//						message = e.getMessage();
+//						Log.e(TAG, message);
+//					}
+//				}
+//				callback.onDataReceived(dashboard, error, message);
+//			}
+//		}).execute("");
+//
+//	}
 
 	/**
-	 * Submit call to to the server.
+	 * Submit call to to the servers.
 	 * @param callback The callback to execute when submission status is available.
 	 */
-	public void postUserProfile(String restUrl, String requestBody, ArrayList<Machine> machines, final PostResponseCallback callback){
+	private void postUserProfile(String restUrl, String requestBody, ArrayList<Machine> machines, final PostResponseCallback callback){
 
 	}
+
+    private String apiBase() {
+        return  "http://" + server.getHost() + "/api";
+    }
+
+    private String apiBaseAuthenticated() {
+        return  "http://" + server.getName() + ":" + server.getPassword() + "@" + server.getHost() + "/api";
+    }
+
+    private String constructURLtoListAllMachines(){
+        return apiBaseAuthenticated() + "/appserver/rest/cloud_api_machine/list";
+
+    }
+
+    private String constructURLtoListAllScenarios(){
+        return apiBase() + "/scenarios";
+    }
+
+    private String constructURLtoForScenario(Long id){
+        return apiBase() + "/scenarios/" + id;
+    }
+
+    private String constructURLtoForScenarioAndNode(Long id, String node){
+        return constructURLtoForScenario(id) + node;
+    }
+
+//    private String constructURLtoGetIpAddress(){
+//        return apiBaseAuthenticated() + "/appserver/rest/cloud_api_machine/getPublicIpaddress?machineguid=";
+//
+//    }
+//
+//    private String constructURLtoGetDashboardData(){
+//        return apiBaseAuthenticated() + "/appserver/rest/cloud_api_cmc/getDashboard";
+//
+//    }
+
 }
 
 

@@ -25,7 +25,7 @@ public class ScenarioActivity extends Activity {
     
     private void init(){
         mNodeList = (ListView) findViewById(R.id.listNodes);
-        nodes = MainActivity.selectedScenario.getNodes();
+        nodes = ScenariosFragment.selectedScenario.getNodes();
         nodeAdapter = new NodeAdapter(this, nodes);
         mNodeList.setAdapter(nodeAdapter);
     }

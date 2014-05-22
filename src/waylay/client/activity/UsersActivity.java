@@ -18,7 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-public class UsersActivity extends Activity {
+public class UsersActivity extends BaseActivity {
 
 	public static final String TAG = "User Manager";
 
@@ -32,11 +32,11 @@ public class UsersActivity extends Activity {
 		super.onCreate(savedInstanceState);  
 		setContentView(R.layout.users);
 
-		mConnectButton = (Button) findViewById(R.id.buttonConnection);
-		mUserName = (EditText) findViewById(R.id.userNameEditText);
-		mUserPassword = (EditText) findViewById(R.id.passwordEditText);
-		machineSpinner = (Spinner) findViewById(R.id.machineSpinner);
-		connetionTypeSpinner = (Spinner) findViewById(R.id.ConnectionTypeSpinner);
+		mConnectButton = viewById(R.id.buttonConnection);
+		mUserName = viewById(R.id.userNameEditText);
+		mUserPassword = viewById(R.id.passwordEditText);
+		machineSpinner = viewById(R.id.machineSpinner);
+		connetionTypeSpinner = viewById(R.id.ConnectionTypeSpinner);
 
 		ArrayAdapter<MachineInfo> adapter;
 		adapter = new ArrayAdapter<MachineInfo>(this, android.R.layout.simple_spinner_item, MachineFactory.getMachines());
@@ -52,8 +52,8 @@ public class UsersActivity extends Activity {
 		if(MainActivity.selectedUser != null){
 
 			Log.d(TAG, "selected existing user " + MainActivity.selectedUser);
-			mUserName.setText((CharSequence) MainActivity.selectedUser.getName());
-			mUserPassword.setText((CharSequence) MainActivity.selectedUser.getPassword());
+			mUserName.setText(MainActivity.selectedUser.getName());
+			mUserPassword.setText(MainActivity.selectedUser.getPassword());
 
 			int spinnerPosition = adapter.getPosition(MainActivity.selectedUser.getMachine());
 			machineSpinner.setSelection(spinnerPosition);
@@ -126,12 +126,6 @@ public class UsersActivity extends Activity {
 			}
 		});
 
-	}
-	
-	protected void alert(String message) {
-		MainActivity.alertMessage = message;
-		Intent i = new Intent(this, AlertDialogActivity.class);
-		startActivity(i);   
 	}
 
 	private UserInfo getCurrentUser(){

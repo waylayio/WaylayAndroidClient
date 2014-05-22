@@ -13,6 +13,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 
 import android.os.AsyncTask;
@@ -49,19 +52,27 @@ public class GetTask extends AsyncTask<String, String, String>{
 	@Override
 	protected String doInBackground(String... params) {
 
-		URI uri = null;
+		URI uri;
 		try {
 			uri = new URI(mRestUrl);
-		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (URISyntaxException e) {
+            Log.e(TAG,e.getMessage(), e);
 			return null;
 		}
 		Log.d(TAG, "start http sesssion with URL" + mRestUrl);
 		AuthScope authScope = new AuthScope(uri.getHost(), uri.getPort());    
 		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userName, password);
 
-		DefaultHttpClient httpclient = new DefaultHttpClient();  
+        HttpParams httpParameters = new BasicHttpParams();
+        // Set the timeout in milliseconds until a connection is established.
+        // The default value is zero, that means the timeout is not used.
+        int timeoutConnection = 5000;
+        HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+        // Set the default socket timeout (SO_TIMEOUT)
+        // in milliseconds which is the timeout for waiting for data.
+        int timeoutSocket = 10000;
+        HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+		DefaultHttpClient httpclient = new DefaultHttpClient(httpParameters);
 		httpclient.getCredentialsProvider().setCredentials(authScope, credentials);
 
 
@@ -87,7 +98,6 @@ public class GetTask extends AsyncTask<String, String, String>{
 
 	public static String getError(){
 		return error;
-
 	}
 }
 

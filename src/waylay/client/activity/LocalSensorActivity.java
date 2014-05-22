@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import waylay.client.WaylayApplication;
 import waylay.client.scenario.Node;
 import waylay.client.scenario.Scenario;
 import waylay.client.sensor.LocalSensor;
@@ -81,7 +82,6 @@ public class LocalSensorActivity extends Activity{
 
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -122,7 +122,7 @@ public class LocalSensorActivity extends Activity{
             public void onClick(View v) {
                 Log.d(TAG, "mConnectButton clicked");
                 if(localSensor != null && scenario != null && selectedNode != null){
-                	MainActivity.pushData(localSensor, scenario.getId(), selectedNode);
+                	WaylayApplication.startPushing(localSensor, scenario.getId(), selectedNode);
                 }  
                 finish();
             }

@@ -4,7 +4,7 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk android:minSdkVersion="11" />
+    <uses-sdk android:minSdkVersion="14" />
     
     <supports-screens android:resizeable="true"
                   android:anyDensity="true" />
@@ -34,13 +34,13 @@
             </intent-filter>
         </activity>
        
-       <activity android:name="waylay.client.activity.MachinesActivity" ></activity>
-       <activity android:name="waylay.client.activity.ScenarioActivity" ></activity>
-       <activity android:name="waylay.client.activity.UsersActivity" ></activity>
-       <activity android:name="waylay.client.activity.SetupActivity" ></activity> 
-       <activity android:name="waylay.client.activity.AlertDialogActivity" ></activity> 
-       <activity android:name="waylay.client.activity.PlotActivity" ></activity>
-       <activity android:name="waylay.client.activity.LocalSensorActivity" ></activity>
+       <activity android:name="waylay.client.activity.MachinesActivity" />
+       <activity android:name="waylay.client.activity.ScenarioActivity" />
+       <activity android:name="waylay.client.activity.UsersActivity" />
+       <activity android:name="waylay.client.activity.SetupActivity" />
+       <activity android:name="waylay.client.activity.AlertDialogActivity" />
+       <activity android:name="waylay.client.activity.PlotActivity" />
+       <activity android:name="waylay.client.activity.LocalSensorActivity" />
 
         <service android:name="com.estimote.sdk.service.BeaconService"
             android:exported="false"/>

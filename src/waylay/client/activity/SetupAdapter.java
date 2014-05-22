@@ -1,7 +1,8 @@
 package waylay.client.activity;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import waylay.client.WaylayApplication;
 import waylay.client.data.BayesServer;
 
 import com.waylay.client.R;
@@ -17,9 +18,9 @@ import android.widget.TextView;
 public class SetupAdapter extends ArrayAdapter<BayesServer> {
 	
 	private final Context context;
-	private final ArrayList<BayesServer> values;
+	private final List<BayesServer> values;
 
-	public SetupAdapter(Context context, ArrayList<BayesServer> values) {
+	public SetupAdapter(Context context, List<BayesServer> values) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
@@ -34,12 +35,12 @@ public class SetupAdapter extends ArrayAdapter<BayesServer> {
 		TextView textUser = (TextView) rowView.findViewById(R.id.subtitle);
 		TextView textAddress = (TextView) rowView.findViewById(R.id.rightcorner);
 		ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-		textURL.setText(values.get(position).getURL());
+		textURL.setText(values.get(position).getHost());
 		textUser.setText(values.get(position).getName());
 		textAddress.setText("");
 		// Change the icon for Windows and iPhone
 		BayesServer m = values.get(position);
-		if(m.equals(MainActivity.bayesServer))
+		if(m.equals(WaylayApplication.getSelectedServer()))
 			imageView.setImageResource(R.drawable.network);
 		else
 			imageView.setImageResource(R.drawable.tools);

@@ -1,6 +1,7 @@
 package waylay.client.activity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import waylay.client.scenario.Scenario;
@@ -8,7 +9,7 @@ import waylay.client.scenario.Scenario;
 public class ScenarioFactory {
 
 	private static final ArrayList<Scenario> scenarioList = new ArrayList<Scenario>();
-	
+
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Scenario> getsScenarios() {
 		Collections.sort(scenarioList);
@@ -27,6 +28,12 @@ public class ScenarioFactory {
 		}else
 			scenarioList.add(scenario);
 	}
+
+    public static void addAll(Collection<Scenario> scenarios){
+        for(Scenario scenario:scenarios){
+            addScenario(scenario);
+        }
+    }
 	
 	public static void removeScenario(Scenario scenario){
 		scenarioList.remove(scenario);
