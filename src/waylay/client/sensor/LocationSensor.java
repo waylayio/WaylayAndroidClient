@@ -23,13 +23,13 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
 
 	private Location location;
 
-    private Runnable listener;
+    private SensorListener listener;
 	
 	public LocationSensor(){
 		
 	}
 
-    public void start(final LocationManager locationManager, final Runnable listener) {
+    public void start(final LocationManager locationManager, final SensorListener listener) {
         Log.i(TAG, "Starting " + this + " with " + locationManager);
         this.listener = listener;
 
@@ -126,7 +126,7 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
     @Override
     public void onLocationChanged(Location location) {
         this.location = location;
-        listener.run();
+        listener.onSensorUpdate();
     }
 
     @Override

@@ -49,7 +49,7 @@ public class WaylayApplication extends Application{
     }
 
     public static void startPushing(final AbstractLocalSensor localSensor, final Long id, final String node) {
-        Log.d(TAG, "start pushing data to " +id + " , node " + node);
+        Log.i(TAG, "start pushing data to scenario " + id + " , node " + node);
         pushers.add(executorService.scheduleWithFixedDelay(new Pusher(id, node, localSensor), 0, PUSH_PERIOD, PUSH_TIMEUNIT));
     }
 
@@ -97,16 +97,20 @@ public class WaylayApplication extends Application{
 
         @Override
         public void run() {
-            Map<String, String> mapping = sensor.getRuntimeData();
-            for(Map.Entry<String,String> entry: mapping.entrySet()){
-                final Map.Entry<String,String> finalEntry = entry;
-                Log.i(TAG, "pushing data from " + sensor.getName() + ", send runtime_property " + finalEntry.getKey() + " = " + finalEntry.getValue());
-                service.postScenarioNodeValueAction(scenarioId, node, finalEntry.getKey(), finalEntry.getValue(), new PostResponseCallback() {
-                    @Override
-                    public void onPostSuccess() {
-                        Log.i(TAG, "pushed data from " + sensor.getName() + ", send runtime_property " + finalEntry);
-                    }
-                });
+            try {
+                Map<String, String> mapping = sensor.getRuntimeData();
+                for (Map.Entry<String, String> entry : mapping.entrySet()) {
+                    final Map.Entry<String, String> finalEntry = entry;
+                    Log.i(TAG, "pushing data from " + sensor.getName() + ", send runtime_property " + finalEntry.getKey() + " = " + finalEntry.getValue());
+                    service.postScenarioNodeValueAction(scenarioId, node, finalEntry.getKey(), finalEntry.getValue(), new PostResponseCallback() {
+                        @Override
+                        public void onPostSuccess() {
+                            Log.i(TAG, "pushed data from " + sensor.getName() + ", send runtime_property " + finalEntry);
+                        }
+                    });
+                }
+            }catch (Exception ex){
+                Log.e(TAG, ex.getMessage(), ex);
             }
         }
     }

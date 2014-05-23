@@ -27,13 +27,13 @@ public class BeaconSensor extends AbstractLocalSensor {
 
     private boolean active = false;
 
-    private Runnable listener;
+    private SensorListener listener;
 
     public BeaconSensor(){
         Log.i(TAG, "new BeaconSensor");
     }
 
-    public void start(final BeaconManager beaconManager, final Runnable listener){
+    public void start(final BeaconManager beaconManager, final SensorListener listener){
         Log.i(TAG, "Starting " + this + " with " + beaconManager);
         this.listener = listener;
 
@@ -102,9 +102,13 @@ public class BeaconSensor extends AbstractLocalSensor {
         return map;
     }
 
-    private void updateData(List<Beacon> beacons) {
+    private void updateData(final List<Beacon> beacons) {
         this.beacons = beacons;
-        listener.run();
+        if(listener != null){
+            listener.onSensorUpdate();
+        }else{
+            // can take a while for unregistration
+        }
     }
 
     @Override

@@ -3,39 +3,40 @@ package waylay.client.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import waylay.client.WaylayApplication;
 import waylay.client.sensor.AbstractLocalSensor;
 import waylay.client.sensor.AccelerometerSensor;
+import waylay.client.sensor.ActivitySensor;
 import waylay.client.sensor.BeaconSensor;
 import waylay.client.sensor.LocationSensor;
 import waylay.client.sensor.ForceSensor;
+import waylay.client.sensor.RawSensor;
+import waylay.client.sensor.SensorListener;
+import waylay.client.service.ActivityManager;
 
-import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
-import com.estimote.sdk.Region;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.waylay.client.R;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.Window;
-import android.widget.Toast;
 
-public class MainActivity extends BaseActivity implements SensorEventListener, Runnable,
+public class MainActivity extends BaseActivity implements SensorEventListener, SensorListener,
         SensorsFragement.OnFragmentInteractionListener,
         SetupFragment.OnFragmentInteractionListener{
 
@@ -45,6 +46,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener, R
     private static final String FRAGMENT_TAG_SENSORS = "sensors";
     private static final String FRAGMENT_TAG_SETUP = "setup";
 
+    /*
+     * Define a request code to send to Google Play services
+     * This code is returned in Activity.onActivityResult
+     */
+    public final static int
+            CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+
     public static List<AbstractLocalSensor> listLocalSensors = new ArrayList<AbstractLocalSensor>();
 
     //sensors
@@ -53,12 +61,12 @@ public class MainActivity extends BaseActivity implements SensorEventListener, R
     private AccelerometerSensor accelometerSensor = new AccelerometerSensor();
     private ForceSensor velocitySensor = new ForceSensor();
     private BeaconSensor beaconSensor = new BeaconSensor();
+    private ActivitySensor activitySensor = new ActivitySensor();
 
     private SensorManager sensorManager;
-
     private LocationManager locationManager;
-
     private BeaconManager beaconManager;
+    private ActivityManager activityManager;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +80,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, R
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         beaconManager = new BeaconManager(getApplicationContext());
+        activityManager = new ActivityManager(getApplicationContext());
 
         initLocalSensors();
 
@@ -83,96 +92,53 @@ public class MainActivity extends BaseActivity implements SensorEventListener, R
 
         ActionBar.Tab tab = actionBar.newTab()
                 .setText("Scenarios")
-                .setTabListener(new TabListener<ScenariosFragment>(
+                .setTabListener(new DefaultTabListener<ScenariosFragment>(
                         this, FRAGMENT_TAG_SCENARIOS, ScenariosFragment.class));
         actionBar.addTab(tab);
 
         tab = actionBar.newTab()
                 .setText("Sensors")
-                .setTabListener(new TabListener<SensorsFragement>(
+                .setTabListener(new DefaultTabListener<SensorsFragement>(
                         this, FRAGMENT_TAG_SENSORS, SensorsFragement.class));
         actionBar.addTab(tab);
 
         tab = actionBar.newTab()
                 .setText("Setup")
-                .setTabListener(new TabListener<SetupFragment>(
+                .setTabListener(new DefaultTabListener<SetupFragment>(
                         this, FRAGMENT_TAG_SETUP, SetupFragment.class));
         actionBar.addTab(tab);
 	}
 
 
-    public static class TabListener<T extends Fragment> implements ActionBar.TabListener {
-        private Fragment mFragment;
-        private final Activity mActivity;
-        private final String mTag;
-        private final Class<T> mClass;
-
-        /** Constructor used each time a new tab is created.
-         * @param activity  The host Activity, used to instantiate the fragment
-         * @param tag  The identifier tag for the fragment
-         * @param clz  The fragment's Class, used to instantiate the fragment
-         */
-        public TabListener(Activity activity, String tag, Class<T> clz) {
-            mActivity = activity;
-            mTag = tag;
-            mClass = clz;
-        }
-
-    /* The following are each of the ActionBar.TabListener callbacks */
-
-        public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-            // Check if the fragment is already initialized
-            if (mFragment == null) {
-                // If not, instantiate and add it to the activity
-                mFragment = Fragment.instantiate(mActivity, mClass.getName());
-                ft.add(android.R.id.content, mFragment, mTag);
-            } else {
-                // If it exists, simply attach it in order to show it
-                ft.attach(mFragment);
-            }
-        }
-
-        public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            if (mFragment != null) {
-                // Detach the fragment, because another one is being attached
-                ft.detach(mFragment);
-            }
-        }
-
-        public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-            // User selected the already selected tab. Usually do nothing.
-        }
-    }
-
     @Override
-    public void run() {
-        onSensorUpdate();
+    public void onSensorUpdate() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                SensorsFragement fragment = fragmentByTag(FRAGMENT_TAG_SENSORS);
+                if (fragment != null) {
+                    fragment.update();
+                }
+            }
+        });
+
     }
 
     /* Request updates at startup */
     @Override
     protected void onResume() {
         super.onResume();
-        locationSensor.start(locationManager, this);
-        beaconSensor.start(beaconManager, this);
-        sensorManager.registerListener(this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), SensorManager.SENSOR_DELAY_NORMAL);
-
-
+        startSensors();
         onServerChange();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        locationSensor.stop(locationManager);
-        beaconSensor.stop(beaconManager);
-        sensorManager.unregisterListener(this);
+        stopSensors();
     }
 
-	@Override
+    @Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 		// TODO Auto-generated method stub
 		
@@ -192,18 +158,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener, R
         }
 	}
 
-	private void updateSensorEvent(SensorEvent event) {
-		float[] values = event.values;
-		long actualTime = event.timestamp;
-		if(accelometerSensor.isTilt(event.values))
-			return;
-	    if ((actualTime - velocitySensor.getLastUpdate()) * AbstractLocalSensor.NS2S > .1) {
-	    	velocitySensor.updateData(actualTime, values);
-	    	accelometerSensor.updateData(actualTime, values);
-            onSensorUpdate();
-	    }
-	}
-
     @Override
 	public void stopPush(){
         WaylayApplication.stopPushing();
@@ -217,34 +171,170 @@ public class MainActivity extends BaseActivity implements SensorEventListener, R
         }
     }
 
-    private void onSensorUpdate(){
-        SensorsFragement fragment = fragmentByTag(FRAGMENT_TAG_SENSORS);
-        if(fragment != null) {
-            fragment.update();
+    // Define a DialogFragment that displays the error dialog
+    public static class ErrorDialogFragment extends DialogFragment {
+        // Global field to contain the error dialog
+        private Dialog mDialog;
+        // Default constructor. Sets the dialog field to null
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+        // Set the dialog to display
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+        // Return a Dialog to the DialogFragment.
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
+        }
+    }
+
+    /*
+     * Handle results returned to the FragmentActivity
+     * by Google Play services
+     */
+    @Override
+    protected void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
+        // Decide what to do based on the original request code
+        switch (requestCode) {
+            case CONNECTION_FAILURE_RESOLUTION_REQUEST:
+            /*
+             * If the result code is Activity.RESULT_OK, try
+             * to connect again
+             */
+                switch (resultCode) {
+                    case Activity.RESULT_OK :
+                    /*
+                     * Try the request again
+                     */
+                    break;
+                }
+
+        }
+
+    }
+
+    private boolean servicesConnected() {
+        // Check that Google Play services is available
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        // If Google Play services is available
+        if (ConnectionResult.SUCCESS == resultCode) {
+            // In debug mode, log the status
+            Log.d("Activity Recognition", "Google Play services is available.");
+            // Continue
+            return true;
+            // Google Play services was not available for some reason
+        } else {
+            // Get the error dialog from Google Play services
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+                    resultCode,
+                    this,
+                    CONNECTION_FAILURE_RESOLUTION_REQUEST);
+
+            // If Google Play services can provide an error dialog
+            if (errorDialog != null) {
+                // Create a new DialogFragment for the error dialog
+                ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+                // Set the dialog in the DialogFragment
+                errorFragment.setDialog(errorDialog);
+                // Show the error dialog in the DialogFragment
+                errorFragment.show(
+                        getFragmentManager(),
+                        "Activity Recognition");
+            }
+            return false;
         }
     }
 
     private void initLocalSensors() {
-        listLocalSensors.remove(locationSensor);
+        listLocalSensors.clear();
         listLocalSensors.add(locationSensor);
-        listLocalSensors.remove(accelometerSensor);
         listLocalSensors.add(accelometerSensor);
-        listLocalSensors.remove(velocitySensor);
         listLocalSensors.add(velocitySensor);
-        listLocalSensors.remove(beaconSensor);
         listLocalSensors.add(beaconSensor);
+        listLocalSensors.add(activitySensor);
 
-        locationSensor.start(locationManager, this);
-        beaconSensor.start(beaconManager, this);
+        for(Sensor sensor:sensorManager.getSensorList(Sensor.TYPE_ALL)){
+            Log.i(TAG, sensor.getType() + " " + sensor.getName());
+            listLocalSensors.add(new RawSensor(sensor));
+        }
+    }
 
 
+    private void updateSensorEvent(SensorEvent event) {
+        float[] values = event.values;
+        long actualTime = event.timestamp;
+        if(accelometerSensor.isTilt(event.values))
+            return;
+        if ((actualTime - velocitySensor.getLastUpdate()) * AbstractLocalSensor.NS2S > .1) {
+            velocitySensor.updateData(actualTime, values);
+            accelometerSensor.updateData(actualTime, values);
+            onSensorUpdate();
+        }
+    }
+
+    private void startSensors() {
+
+        SensorListener buffered = new BufferingSensorListener(this, 1, TimeUnit.SECONDS);
+
+        locationSensor.start(locationManager, buffered);
+        beaconSensor.start(beaconManager, buffered);
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), SensorManager.SENSOR_DELAY_NORMAL);
+        for(AbstractLocalSensor sensor:listLocalSensors){
+            if(sensor instanceof RawSensor){
+                RawSensor rawSensor = (RawSensor)sensor;
+                rawSensor.start(sensorManager, buffered);
+            }
+        }
 
 
+        if(servicesConnected()){
+            activitySensor.start(activityManager);
+        }
     }
 
+    private void stopSensors() {
+        locationSensor.stop(locationManager);
+        beaconSensor.stop(beaconManager);
+        sensorManager.unregisterListener(this);
+        for(AbstractLocalSensor sensor:listLocalSensors){
+            if(sensor instanceof RawSensor){
+                RawSensor rawSensor = (RawSensor)sensor;
+                rawSensor.stop(sensorManager);
+            }
+        }
+        if(servicesConnected()){
+            activitySensor.stop(activityManager);
+        }
+    }
+
+    private static class BufferingSensorListener implements SensorListener{
+
+        // for avoiding too fast updates, create wrapper
+        private volatile long last = System.currentTimeMillis();
+
+        private final long delay;
+        private final SensorListener delegate;
+
+        private BufferingSensorListener(final SensorListener delegate, long delay, TimeUnit timeUnit) {
+            this.delegate = delegate;
+            this.delay = timeUnit.toMillis(delay);
+        }
+
+        @Override
+        public void onSensorUpdate() {
+            long now = System.currentTimeMillis();
+            if(now - last > delay) {
+                last = now;
+                delegate.onSensorUpdate();
+            }
+        }
+    }
 
 }

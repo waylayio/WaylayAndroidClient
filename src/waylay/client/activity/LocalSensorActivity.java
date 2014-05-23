@@ -24,6 +24,7 @@ import android.widget.Button;
 
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LocalSensorActivity extends BaseActivity {
 
@@ -43,7 +44,8 @@ public class LocalSensorActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);  
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.local_sensor);
-		scenarios = filterScenarios(ScenarioFactory.getsScenarios());
+
+		scenarios = ScenarioFactory.getsScenarios();//filterScenarios(ScenarioFactory.getsScenarios());
 
 		mConnectButton = viewById(R.id.buttonPushLocalData);
 		scenarioSpinner = viewById(R.id.scenarioSpinner);
@@ -55,8 +57,9 @@ public class LocalSensorActivity extends BaseActivity {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
 		scenarioSpinner.setAdapter(adapter);
 		
-		if(scenarios.size() > 0)
-			listNodes = filterNodes(scenarios.get(0).getNodes());
+		if(scenarios.size() > 0) {
+            listNodes = filterNodes(scenarios.get(0).getNodes());
+        }
 		final ArrayAdapter<Node> adapterNode = new ArrayAdapter<Node>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, listNodes);
 		adapterNode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
 		nodeSpinner.setAdapter(adapterNode);
@@ -104,7 +107,7 @@ public class LocalSensorActivity extends BaseActivity {
 
         if(SensorsFragement.selectedLocalSensor != null){
         	Log.d(TAG, "selected sensor " + SensorsFragement.selectedLocalSensor);
-        	mSelectedSensor.setText((CharSequence) SensorsFragement.selectedLocalSensor.getName());
+        	mSelectedSensor.setText(SensorsFragement.selectedLocalSensor.getName());
         } else{
         	Log.e(TAG, "sensor not selected");
         	return;
@@ -112,23 +115,25 @@ public class LocalSensorActivity extends BaseActivity {
             
         mConnectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d(TAG, "mConnectButton clicked");
-                if(localSensor != null && scenario != null && selectedNode != null){
+                if(localSensor != null && scenario != null){
                 	WaylayApplication.startPushing(localSensor, scenario.getId(), selectedNode);
-                }  
-                finish();
+                    finish();
+                }else{
+                    Log.e(TAG,  "Sensor or Scenario is null");
+                    Toast.makeText(LocalSensorActivity.this, "Sensor or Scenario is null", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 		
 	}
 
-	private ArrayList<Scenario> filterScenarios(ArrayList<Scenario> _scenarios) {
-		ArrayList<Scenario> list = new ArrayList<Scenario>();
-		for(Scenario scenario : _scenarios ){
+	private ArrayList<Scenario> filterScenarios(ArrayList<Scenario> scenarios) {
+		ArrayList<Scenario> filtered = new ArrayList<Scenario>();
+		for(Scenario scenario : scenarios ){
 			for(Node node : scenario.getNodes()){
 				if(node.getSensorName() != null && 
 						node.getSensorName().startsWith(SensorsFragement.selectedLocalSensor.getName())){
-					list.add(scenario);
+					filtered.add(scenario);
 					break;
 				}	//TODO hack, later ask for runtime properties from the REST call 	
 				else if(node.getSensorName() != null && 
@@ -138,15 +143,15 @@ public class LocalSensorActivity extends BaseActivity {
                                 SensorsFragement.selectedLocalSensor.getName().startsWith("Location"))  ||
 						(node.getSensorName().startsWith("Tree") &&
                                 SensorsFragement.selectedLocalSensor.getName().startsWith("Location")) ) )    {
-					list.add(scenario);
+					filtered.add(scenario);
 					break;
 				}	//hack	
 			}
 		}
-		return list;
+		return filtered;
 	}
 
-	protected List<Node> filterNodes(List<Node> nodes) {
+	private List<Node> filterNodes(List<Node> nodes) {
 		List<Node> list = new ArrayList<Node>();
 		for(Node node : nodes){
 			if(node.getSensorName() != null && 

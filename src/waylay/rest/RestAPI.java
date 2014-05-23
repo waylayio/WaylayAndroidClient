@@ -149,6 +149,9 @@ public class RestAPI{
     }
 
     private String constructURLtoForScenarioAndNode(Long id, String node){
+        if(node == null){
+            return constructURLtoForScenario(id);
+        }
         return constructURLtoForScenario(id) + node;
     }
 

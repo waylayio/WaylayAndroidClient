@@ -12,7 +12,6 @@ public class ScenarioFactory {
 
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Scenario> getsScenarios() {
-		Collections.sort(scenarioList);
 		return scenarioList;
 	}
 	
@@ -25,8 +24,10 @@ public class ScenarioFactory {
 			removeScenario(scenario);
 			scenarioList.add(scenario);
 			Collections.sort(scenarioList);
-		}else
-			scenarioList.add(scenario);
+		}else {
+            scenarioList.add(scenario);
+        }
+        Collections.sort(scenarioList);
 	}
 
     public static void addAll(Collection<Scenario> scenarios){
