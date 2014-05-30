@@ -59,11 +59,15 @@ public class RestAPI{
         }).execute("");
     }
 	
-	public void deleteScenarioAction(long scenarioId, final PostResponseCallback callback){
+	public void deleteScenarioAction(long scenarioId, final DeleteResponseCallback callback){
         String url = constructURLtoForScenario(scenarioId);
 		new DeleteTask(url, new RestTaskCallback(){
 			public void onTaskComplete(String response){
-				callback.onPostSuccess();
+                if(DeleteTask.RESULT_OK.equals(response)) {
+                    callback.onDeleteSuccess();
+                }else{
+                    callback.onDeleteFailure();
+                }
 			}
 		}).execute("");
 	}

@@ -22,6 +22,7 @@ import java.util.List;
 
 import waylay.client.WaylayApplication;
 import waylay.client.scenario.Scenario;
+import waylay.rest.DeleteResponseCallback;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.PostResponseCallback;
 
@@ -198,12 +199,21 @@ public class ScenariosFragment extends BaseFragment {
                     }
                 });
             } else if(ACTION_DELETE.equals(action)){
-                WaylayApplication.getRestService().deleteScenarioAction(id, new PostResponseCallback() {
+                WaylayApplication.getRestService().deleteScenarioAction(id, new DeleteResponseCallback() {
                     @Override
-                    public void onPostSuccess() {
+                    public void onDeleteSuccess() {
                         Log.i(TAG, "action was success");
                         ScenarioFactory.removeScenario(selectedScenario);
                         selectedScenario = null;
+                        updateScenarios();
+                    }
+
+                    @Override
+                    public void onDeleteFailure() {
+                        Activity activity = getActivity();
+                        if(activity != null) {
+                            Toast.makeText(activity, "Failed to delete scenario", Toast.LENGTH_SHORT).show();
+                        }
                         updateScenarios();
                     }
                 });
