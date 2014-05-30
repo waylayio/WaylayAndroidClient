@@ -1,26 +1,42 @@
 package waylay.client;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.estimote.sdk.Beacon;
-import com.estimote.sdk.BeaconManager;
-import com.estimote.sdk.Region;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+import org.apache.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import waylay.client.data.BayesServer;
 import waylay.client.sensor.AbstractLocalSensor;
 import waylay.rest.PostResponseCallback;
-import waylay.rest.RestAPI;
+import waylay.rest.WaylayRestClient;
+import waylay.rest.xively.DeviceList;
+import waylay.rest.xively.DeviceResponse;
+import waylay.rest.xively.Devices;
+import waylay.rest.xively.Serial;
+import waylay.rest.xively.XivelyError;
+import waylay.rest.xively.XivelyRestApi;
+import waylay.rest.xively.XivelyRestClient;
+import waylay.utils.UniqueId;
 
 public class WaylayApplication extends Application{
 
@@ -28,6 +44,8 @@ public class WaylayApplication extends Application{
 
     public static final TimeUnit PUSH_TIMEUNIT = TimeUnit.SECONDS;
     public static final long PUSH_PERIOD = 1;
+    public static final String XIVELY_PRODUCT_ID = "eN9d24gh_pYMbrPoi1Ll";
+    public static final String XIVELY_API_KEY = "???";
 
     public static List<BayesServer> servers = new ArrayList<BayesServer>();
     private static BayesServer selectedBayesServer = null;
@@ -42,10 +60,15 @@ public class WaylayApplication extends Application{
         super.onCreate();
         com.estimote.sdk.utils.L.enableDebugLogging(true);
         initServer();
+
+        final String uniqueId = UniqueId.get(this);
+
+        final XivelyRestClient xively = new XivelyRestClient(XIVELY_API_KEY);
+        xively.makeSureDeviceExists(XIVELY_PRODUCT_ID, uniqueId, null);
     }
 
-    public static RestAPI getRestService(){
-        return new RestAPI(selectedBayesServer);
+    public static WaylayRestClient getRestService(){
+        return new WaylayRestClient(selectedBayesServer);
     }
 
     public static void startPushing(final AbstractLocalSensor localSensor, final Long id, final String node) {
@@ -86,7 +109,7 @@ public class WaylayApplication extends Application{
         private final AbstractLocalSensor sensor;
 
         // keep this around as we don' want to suddenly change servers
-        private final RestAPI service;
+        private final WaylayRestClient service;
 
         private Pusher(final long scenarioId, final String node, final AbstractLocalSensor sensor) {
             this.scenarioId = scenarioId;

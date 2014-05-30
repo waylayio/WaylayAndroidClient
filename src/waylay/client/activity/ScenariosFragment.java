@@ -94,7 +94,7 @@ public class ScenariosFragment extends BaseFragment {
 					return false;
 				}*/
                 selectedScenario = (Scenario) mScenarioList.getItemAtPosition(position);
-                getActivity().startActionMode(MyScenarioActionModeCallback);
+                getActivity().startActionMode(myScenarioActionModeCallback);
                 view.setSelected(true);
                 return true;
 
@@ -148,7 +148,7 @@ public class ScenariosFragment extends BaseFragment {
         }
     }
 
-    private ActionMode.Callback MyScenarioActionModeCallback = new ActionMode.Callback() {
+    private ActionMode.Callback myScenarioActionModeCallback = new ActionMode.Callback() {
 
         // Called when the action mode is created; startActionMode() was called
         @Override
@@ -191,7 +191,7 @@ public class ScenariosFragment extends BaseFragment {
         private void actioScenarioItem(String action) {
             final Long id = selectedScenario.getId();
             if(ACTION_STOP.equals(action) || ACTION_START.equals(action)){
-                WaylayApplication.getRestService().postScenarioAction(id, action, new PostResponseCallback(){
+                WaylayApplication.getRestService().postScenarioAction(id, action, new PostResponseCallback<Void>(){
                     @Override
                     public void onPostSuccess() {
                         Log.i(TAG, "action was success");
@@ -229,11 +229,11 @@ public class ScenariosFragment extends BaseFragment {
     };
 
     public void getScenario(long scenarioId){
-        Log.d(TAG, "refreshAllScenarios");
+        Log.d(TAG, "getScenario");
 
         mListener.startLoading();
 
-        WaylayApplication.getRestService().getScenario(scenarioId, "", new GetResponseCallback<Scenario>() {
+        WaylayApplication.getRestService().getScenario(scenarioId, new GetResponseCallback<Scenario>() {
             @Override
             public void onDataReceived(Scenario scenario, boolean error, String message) {
                 Log.i(TAG, "Received response for scenario " + scenario);
@@ -259,7 +259,7 @@ public class ScenariosFragment extends BaseFragment {
             ScenarioFactory.clear();
 
             mListener.startLoading();
-            WaylayApplication.getRestService().getScenarios("", new GetResponseCallback<List<Scenario>>() {
+            WaylayApplication.getRestService().getScenarios( new GetResponseCallback<List<Scenario>>() {
                 @Override
                 public void onDataReceived(List<Scenario> scenarios, boolean error, String message) {
                     Log.i(TAG, "Received response with " + scenarios.size() + " scenarios");
@@ -275,7 +275,10 @@ public class ScenariosFragment extends BaseFragment {
                 }
             });
         }else{
-            Toast.makeText(getActivity(), "No server selected", Toast.LENGTH_SHORT).show();
+            final Activity activity = getActivity();
+            if(activity != null) {
+                Toast.makeText(activity, "No server selected", Toast.LENGTH_SHORT).show();
+            }
         }
 
     }

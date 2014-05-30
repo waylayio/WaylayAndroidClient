@@ -6,11 +6,11 @@ package waylay.rest;
 * submission is available.
 * 
 */
-public abstract class PostResponseCallback{
+public interface PostResponseCallback <T>{
  /**
   * Called when a POST success response is received. <br/>
   * This method is guaranteed to execute on the UI thread.
   */
- public abstract void onPostSuccess();
+ void onPostSuccess();
 
 }

@@ -7,8 +7,8 @@ import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 import java.util.Collections;
 import java.util.List;
@@ -83,22 +83,20 @@ public class BeaconSensor extends AbstractLocalSensor {
 
     @Override
     public Map<String, String> getRuntimeData() {
-        JSONObject data = new JSONObject();
-        try {
-            for (Beacon beacon : beacons) {
-                data.put("proximityUUID", beacon.getProximityUUID());
-                data.put("name", beacon.getName());
-                data.put("macAddress", beacon.getMacAddress());
-                data.put("major", beacon.getMajor());
-                data.put("minor", beacon.getMinor());
-                data.put("power", beacon.getMeasuredPower());
-                data.put("rssi", beacon.getRssi());
-            }
-        }catch(JSONException ex){
-            Log.e(TAG, ex.getMessage(), ex);
+        JsonObject data = new JsonObject();
+        for (Beacon beacon : beacons) {
+            data.addProperty("proximityUUID", beacon.getProximityUUID());
+            data.addProperty("name", beacon.getName());
+            data.addProperty("macAddress", beacon.getMacAddress());
+            data.addProperty("major", beacon.getMajor());
+            data.addProperty("minor", beacon.getMinor());
+            data.addProperty("power", beacon.getMeasuredPower());
+            data.addProperty("rssi", beacon.getRssi());
         }
+
         Map<String, String> map = new ConcurrentHashMap<String, String>();
-        map.put("runtime_beacons", data.toString());
+        Gson gson = new Gson();
+        map.put("runtime_beacons", gson.toJson(data));
         return map;
     }
 
