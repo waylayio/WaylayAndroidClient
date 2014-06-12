@@ -41,8 +41,9 @@
         <activity android:name="waylay.client.activity.AlertDialogActivity" />
         <activity android:name="waylay.client.activity.LocalSensorActivity" />
 
-        <service android:name="com.estimote.sdk.service.BeaconService"
-            android:exported="false"/>
+        <!-- FIXME Estimote broken on pre 4.3 devices: https://github.com/Estimote/Android-SDK/issues/48 -->
+        <!--<service android:name="com.estimote.sdk.service.BeaconService"-->
+            <!--android:exported="false"/>-->
 
         <service
             android:name="waylay.client.service.ActivityRecognitionIntentService"

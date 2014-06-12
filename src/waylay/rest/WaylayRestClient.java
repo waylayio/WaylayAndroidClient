@@ -95,7 +95,7 @@ public class WaylayRestClient {
         @Override
         public void failure(RetrofitError retrofitError) {
             Log.e(TAG, retrofitError.getMessage(), retrofitError);
-            callback.onDataReceived(null, true, retrofitError.getMessage());
+            callback.onDataReceived(null, true, retrofitError.getResponse().getStatus() + " - " + retrofitError.getMessage());
         }
     }
 

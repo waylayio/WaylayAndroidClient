@@ -262,13 +262,13 @@ public class ScenariosFragment extends BaseFragment {
             WaylayApplication.getRestService().getScenarios( new GetResponseCallback<List<Scenario>>() {
                 @Override
                 public void onDataReceived(List<Scenario> scenarios, boolean error, String message) {
-                    Log.i(TAG, "Received response with " + scenarios.size() + " scenarios");
-
                     if (!error) {
+                        Log.i(TAG, "Received response with " + scenarios.size() + " scenarios");
                         ScenarioFactory.addAll(scenarios);
                         mListener.endLoading();
                         updateScenarios();
                     } else {
+                        Log.e(TAG, message);
                         mListener.endLoading();
                         alert(message);
                     }
