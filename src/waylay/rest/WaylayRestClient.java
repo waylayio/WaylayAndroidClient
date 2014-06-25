@@ -9,7 +9,7 @@ import retrofit.android.AndroidLog;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import waylay.client.data.BayesServer;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 
 import android.util.Log;
 
@@ -32,37 +32,37 @@ public class WaylayRestClient {
     }
 
     public void postScenarioAction(Long scenarioId, String action, final PostResponseCallback<Void> callback){
-        service.performScenarioAction(scenarioId, action, new RetrofitPostResponseCallback<Void>(callback));
+        service.performTaskAction(scenarioId, action, new RetrofitPostResponseCallback<Void>(callback));
 	}
 
     public void postScenarioNodeValueAction(Long scenarioId, String node, String property, String value, final PostResponseCallback<Void> callback){
         if(node == null){
-            service.setScenarioProperty(scenarioId, property, value, new RetrofitPostResponseCallback<Void>(callback));
+            service.setTaskProperty(scenarioId, property, value, new RetrofitPostResponseCallback<Void>(callback));
         }else{
-            service.setScenarioNodeProperty(scenarioId, node, property, value, new RetrofitPostResponseCallback<Void>(callback));
+            service.setTaskNodeProperty(scenarioId, node, property, value, new RetrofitPostResponseCallback<Void>(callback));
         }
     }
 	
 	public void deleteScenarioAction(final long scenarioId, final DeleteResponseCallback callback){
-        service.deleteScenario(scenarioId, new RetrofitDeleteResponseCallback<Void>(callback));
+        service.deleteTask(scenarioId, new RetrofitDeleteResponseCallback<Void>(callback));
 	}
 	
 	/**
 	 * Request a Scenarios from the REST servers.
 	 * @param callback Callback to execute when the profile is available.
 	 */
-	public void getScenarios(final GetResponseCallback<List<Scenario>> callback){
-        service.listScenarios(new RetrofitGetResponseCallback<List<Scenario>>(callback));
+	public void getScenarios(final GetResponseCallback<List<Task>> callback){
+        service.listTasks(new RetrofitGetResponseCallback<List<Task>>(callback));
 	}
 	
-	public void getScenario(final long scenarioId, final GetResponseCallback<Scenario> callback){
-        service.getScenario(scenarioId, new RetrofitGetResponseCallback<Scenario>(callback));
+	public void getScenario(final long scenarioId, final GetResponseCallback<Task> callback){
+        service.getTask(scenarioId, new RetrofitGetResponseCallback<Task>(callback));
 	}
 
     private WaylayRestApi createRestClient(BayesServer server) {
         Gson gson = new GsonBuilder()
                 //.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(Scenario.class, new ScenarioAdapter())
+                .registerTypeAdapter(Task.class, new ScenarioAdapter())
                 .create();
 
         RestAdapter restAdapter = new RestAdapter.Builder()

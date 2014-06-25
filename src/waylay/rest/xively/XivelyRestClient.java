@@ -13,7 +13,7 @@ import retrofit.RetrofitError;
 import retrofit.android.AndroidLog;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 import waylay.rest.RequestLoggingProfiler;
 import waylay.rest.ScenarioAdapter;
 
@@ -80,7 +80,7 @@ public class XivelyRestClient {
     private XivelyRestApi createRestClient(final String apiKey) {
         Gson gson = new GsonBuilder()
                 //.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .registerTypeAdapter(Scenario.class, new ScenarioAdapter())
+                .registerTypeAdapter(Task.class, new ScenarioAdapter())
                 .create();
 
         RestAdapter restAdapter = new RestAdapter.Builder()

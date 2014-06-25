@@ -1,7 +1,7 @@
 package waylay.client.activity;
 
 import java.util.ArrayList;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 import waylay.client.scenario.ScenarioStatus;
 
 import com.waylay.client.R;
@@ -14,12 +14,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ScenarioAdapter extends ArrayAdapter<Scenario> {
+public class ScenarioAdapter extends ArrayAdapter<Task> {
 	
 	private final Context context;
-	private final ArrayList<Scenario> values;
+	private final ArrayList<Task> values;
 
-	public ScenarioAdapter(Context context, ArrayList<Scenario> values) {
+	public ScenarioAdapter(Context context, ArrayList<Task> values) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
@@ -41,7 +41,7 @@ public class ScenarioAdapter extends ArrayAdapter<Scenario> {
 		} else {
 			textID.setText(values.get(position).getId().toString());
 		}
-		Scenario m = values.get(position);
+		Task m = values.get(position);
 		if (!m.getScenarioStatus().equals(ScenarioStatus.RUNNING)) {
 			imageView.setImageResource(R.drawable.nok);
 		} else {

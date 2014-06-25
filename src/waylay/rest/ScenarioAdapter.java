@@ -14,15 +14,15 @@ import java.util.Map;
 
 import waylay.client.scenario.Condition;
 import waylay.client.scenario.Node;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 import waylay.client.scenario.ScenarioStatus;
 
-public class ScenarioAdapter implements JsonDeserializer<Scenario> {
+public class ScenarioAdapter implements JsonDeserializer<Task> {
 
     private static final String TAG = "ScenarioAdapter";
 
     @Override
-    public Scenario deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public Task deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject value = json.getAsJsonObject();
 
         JsonObject target = value.getAsJsonObject("target");
@@ -44,7 +44,7 @@ public class ScenarioAdapter implements JsonDeserializer<Scenario> {
 
         Long id = value.get("ID").getAsLong();
         Log.d(TAG, "getAllScenariosViaJSON got scenario " + id);
-        Scenario scenario = new Scenario(name, targetName, id, ScenarioStatus.getStatus(status),
+        Task task = new Task(name, targetName, id, ScenarioStatus.getStatus(status),
                 condition, refreshRate.intValue());
         JsonArray nodes = value.getAsJsonArray("nodes");
         for(JsonElement nodeElement:nodes){
@@ -68,9 +68,9 @@ public class ScenarioAdapter implements JsonDeserializer<Scenario> {
                     node.addState(stateName, prob);
                 }
             }
-            scenario.addNode(node);
+            task.addNode(node);
         }
-        return scenario;
+        return task;
     }
 
 }

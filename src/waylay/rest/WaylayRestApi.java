@@ -9,36 +9,36 @@ import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.Path;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 
 public interface WaylayRestApi {
 
-    @GET("/scenarios")
-    void listScenarios(Callback<List<Scenario>> cb);
+    @GET("/tasks")
+    void listTasks(Callback<List<Task>> cb);
 
     // TODO add support for filters?
-    @GET("/scenarios/{scenarioId}")
-    void getScenario(@Path("scenarioId") Long scenarioId, Callback<Scenario> cb);
+    @GET("/tasks/{taskId}")
+    void getTask(@Path("taskId") Long taskId, Callback<Task> cb);
 
-    @DELETE("/scenarios/{scenarioId}")
-    void deleteScenario(@Path("scenarioId") Long scenarioId, Callback<Void> cb);
+    @DELETE("/tasks/{taskId}")
+    void deleteTask(@Path("v") Long taskId, Callback<Void> cb);
 
-    @POST("/scenarios/{scenarioId}")
+    @POST("/tasks/{taskId}")
     @FormUrlEncoded
-    void performScenarioAction(@Path("scenarioId") Long scenarioId, @Field("action") String action, Callback<Void> cb);
+    void performTaskAction(@Path("taskId") Long taskId, @Field("action") String action, Callback<Void> cb);
 
-    @POST("/scenarios/{scenarioId}")
+    @POST("/tasks/{taskId}")
     @FormUrlEncoded
-    void setScenarioProperty(
-            @Path("scenarioId") Long scenarioId,
+    void setTaskProperty(
+            @Path("taskId") Long taskId,
             @Field("runtime_property") String property,
             @Field("value") String value,
             Callback<Void> cb);
 
-    @POST("/scenarios/{scenarioId}/{node}")
+    @POST("/tasks/{taskId}/{node}")
     @FormUrlEncoded
-    void setScenarioNodeProperty(
-            @Path("scenarioId") Long scenarioId,
+    void setTaskNodeProperty(
+            @Path("taskId") Long taskId,
             @Path("node") String node,
             @Field("runtime_property") String property,
             @Field("value") String value,

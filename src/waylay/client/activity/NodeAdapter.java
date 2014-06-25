@@ -40,7 +40,7 @@ public class NodeAdapter extends ArrayAdapter<Node> {
 		textTitle.setText(name);
 		textStatus.setText(node.getStatesAsString());
 		textID.setText(node.getMostLikelyState());
-		if (node.getName().equals(ScenariosFragment.selectedScenario.getTargetNode())) {
+		if (node.getName().equals(ScenariosFragment.selectedTask.getTargetNode())) {
 			imageView.setImageResource(R.drawable.trigger);
 		} else {
 			try {

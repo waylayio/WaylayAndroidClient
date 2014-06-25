@@ -7,10 +7,6 @@ import waylay.client.scenario.Node;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import com.waylay.client.R;
@@ -25,7 +21,7 @@ public class ScenarioActivity extends Activity {
     
     private void init(){
         mNodeList = (ListView) findViewById(R.id.listNodes);
-        nodes = ScenariosFragment.selectedScenario.getNodes();
+        nodes = ScenariosFragment.selectedTask.getNodes();
         nodeAdapter = new NodeAdapter(this, nodes);
         mNodeList.setAdapter(nodeAdapter);
     }

@@ -21,7 +21,7 @@ import com.waylay.client.R;
 import java.util.List;
 
 import waylay.client.WaylayApplication;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 import waylay.rest.DeleteResponseCallback;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.PostResponseCallback;
@@ -34,7 +34,7 @@ public class ScenariosFragment extends BaseFragment {
     public static final String ACTION_START = "start";
     public static final String ACTION_STOP = "stop";
 
-    protected static Scenario selectedScenario = null;
+    protected static Task selectedTask = null;
     private ListView mScenarioList;
     private Button mSyncButton;
     protected Object mMachineActionMode;
@@ -93,7 +93,7 @@ public class ScenariosFragment extends BaseFragment {
 				/*if (mScenarioActionMode!= null) {
 					return false;
 				}*/
-                selectedScenario = (Scenario) mScenarioList.getItemAtPosition(position);
+                selectedTask = (Task) mScenarioList.getItemAtPosition(position);
                 getActivity().startActionMode(myScenarioActionModeCallback);
                 view.setSelected(true);
                 return true;
@@ -141,7 +141,7 @@ public class ScenariosFragment extends BaseFragment {
 
         @Override
         public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-            selectedScenario = (Scenario) mScenarioList.getItemAtPosition(position);
+            selectedTask = (Task) mScenarioList.getItemAtPosition(position);
             Intent i = new Intent(activity, m_class);
             startActivity(i);
 
@@ -189,7 +189,7 @@ public class ScenariosFragment extends BaseFragment {
         }
 
         private void actioScenarioItem(String action) {
-            final Long id = selectedScenario.getId();
+            final Long id = selectedTask.getId();
             if(ACTION_STOP.equals(action) || ACTION_START.equals(action)){
                 WaylayApplication.getRestService().postScenarioAction(id, action, new PostResponseCallback<Void>(){
                     @Override
@@ -203,8 +203,8 @@ public class ScenariosFragment extends BaseFragment {
                     @Override
                     public void onDeleteSuccess() {
                         Log.i(TAG, "action was success");
-                        ScenarioFactory.removeScenario(selectedScenario);
-                        selectedScenario = null;
+                        ScenarioFactory.removeScenario(selectedTask);
+                        selectedTask = null;
                         updateScenarios();
                     }
 
@@ -229,16 +229,16 @@ public class ScenariosFragment extends BaseFragment {
     };
 
     public void getScenario(long scenarioId){
-        Log.d(TAG, "getScenario");
+        Log.d(TAG, "getTask");
 
         mListener.startLoading();
 
-        WaylayApplication.getRestService().getScenario(scenarioId, new GetResponseCallback<Scenario>() {
+        WaylayApplication.getRestService().getScenario(scenarioId, new GetResponseCallback<Task>() {
             @Override
-            public void onDataReceived(Scenario scenario, boolean error, String message) {
-                Log.i(TAG, "Received response for scenario " + scenario);
+            public void onDataReceived(Task task, boolean error, String message) {
+                Log.i(TAG, "Received response for scenario " + task);
                 if (!error) {
-                    ScenarioFactory.addScenario(scenario);
+                    ScenarioFactory.addScenario(task);
                     mListener.endLoading();
                     updateScenarios();
                 } else {
@@ -259,12 +259,12 @@ public class ScenariosFragment extends BaseFragment {
             ScenarioFactory.clear();
 
             mListener.startLoading();
-            WaylayApplication.getRestService().getScenarios( new GetResponseCallback<List<Scenario>>() {
+            WaylayApplication.getRestService().getScenarios( new GetResponseCallback<List<Task>>() {
                 @Override
-                public void onDataReceived(List<Scenario> scenarios, boolean error, String message) {
+                public void onDataReceived(List<Task> tasks, boolean error, String message) {
                     if (!error) {
-                        Log.i(TAG, "Received response with " + scenarios.size() + " scenarios");
-                        ScenarioFactory.addAll(scenarios);
+                        Log.i(TAG, "Received response with " + tasks.size() + " scenarios");
+                        ScenarioFactory.addAll(tasks);
                         mListener.endLoading();
                         updateScenarios();
                     } else {

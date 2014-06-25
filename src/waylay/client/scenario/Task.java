@@ -3,7 +3,7 @@ package waylay.client.scenario;
 import java.util.ArrayList;
 
 
-public class Scenario implements Comparable{
+public class Task implements Comparable{
     private String name;
     private String targetNode;
     private Long id;
@@ -12,12 +12,12 @@ public class Scenario implements Comparable{
     private int refreshRate = 10;
     private ArrayList<Node> nodes = new ArrayList<Node>();
 
-    public Scenario(String name, String targetNode, Long id, ScenarioStatus scenarioStatus, Condition condition, int refreshRate) {
+    public Task(String name, String targetNode, Long id, ScenarioStatus scenarioStatus, Condition condition, int refreshRate) {
         this(name, targetNode, id, scenarioStatus, condition);
         this.refreshRate = refreshRate;
     }
 
-    public Scenario(String name, String targetNode, Long id, ScenarioStatus scenarioStatus, Condition condition) {
+    public Task(String name, String targetNode, Long id, ScenarioStatus scenarioStatus, Condition condition) {
         this.name = name;
         this.targetNode = targetNode;
         this.id = id;
@@ -77,7 +77,7 @@ public class Scenario implements Comparable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Scenario other = (Scenario) obj;
+		Task other = (Task) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -100,7 +100,7 @@ public class Scenario implements Comparable{
 
 	@Override
 	public int compareTo(Object arg0) {
-		Scenario o2 = (Scenario) arg0;
+		Task o2 = (Task) arg0;
 		return this.id.compareTo(o2.id);
 	}
 }

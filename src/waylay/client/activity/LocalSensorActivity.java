@@ -7,12 +7,11 @@ import java.util.List;
 
 import waylay.client.WaylayApplication;
 import waylay.client.scenario.Node;
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 import waylay.client.sensor.AbstractLocalSensor;
 
 import com.waylay.client.R;
 
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,16 +35,16 @@ public class LocalSensorActivity extends BaseActivity {
 	private TextView mSelectedSensor;
 	private AbstractLocalSensor localSensor;
 	private String selectedNode;
-	private Scenario scenario;
+	private Task task;
 	private List<Node> listNodes = new ArrayList<Node>();
-	private List<Scenario> scenarios = new ArrayList<Scenario>();
+	private List<Task> tasks = new ArrayList<Task>();
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);  
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.local_sensor);
 
-		scenarios = ScenarioFactory.getsScenarios();//filterScenarios(ScenarioFactory.getsScenarios());
+		tasks = ScenarioFactory.getsScenarios();//filterScenarios(ScenarioFactory.getsScenarios());
 
 		mConnectButton = viewById(R.id.buttonPushLocalData);
 		scenarioSpinner = viewById(R.id.scenarioSpinner);
@@ -53,12 +52,12 @@ public class LocalSensorActivity extends BaseActivity {
 		mSelectedSensor = viewById(R.id.selectedLocalSensorLabel);
 		localSensor = SensorsFragement.selectedLocalSensor;
 
-		ArrayAdapter<Scenario> adapter = new ArrayAdapter<Scenario>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, scenarios);
+		ArrayAdapter<Task> adapter = new ArrayAdapter<Task>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, tasks);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
 		scenarioSpinner.setAdapter(adapter);
 		
-		if(scenarios.size() > 0) {
-            listNodes = filterNodes(scenarios.get(0).getNodes());
+		if(tasks.size() > 0) {
+            listNodes = filterNodes(tasks.get(0).getNodes());
         }
 		final ArrayAdapter<Node> adapterNode = new ArrayAdapter<Node>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, listNodes);
 		adapterNode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
@@ -72,7 +71,7 @@ public class LocalSensorActivity extends BaseActivity {
 				int i = nodeSpinner.getSelectedItemPosition();
 				Node node = listNodes.get(i);
 				selectedNode =  String.valueOf(node.getName());
-				mSelectedSensor.setText("Scenario[" + scenario.getId()+ "], " + "Node[" + selectedNode+ "] " + SensorsFragement.selectedLocalSensor.getName());
+				mSelectedSensor.setText("Scenario[" + task.getId()+ "], " + "Node[" + selectedNode+ "] " + SensorsFragement.selectedLocalSensor.getName());
 			}
 
 			@Override
@@ -87,15 +86,15 @@ public class LocalSensorActivity extends BaseActivity {
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
 				int i = scenarioSpinner.getSelectedItemPosition();
-				scenario = scenarios.get(i);
-				listNodes = filterNodes(scenario.getNodes());
+				task = tasks.get(i);
+				listNodes = filterNodes(task.getNodes());
 				if(listNodes.size() > 0){
 					//what the hell...with final it is not working
 					ArrayAdapter<Node> adapterNode = new ArrayAdapter<Node>(LocalSensorActivity.this, android.R.layout.simple_spinner_item, listNodes);
 					adapterNode.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);        
 					nodeSpinner.setAdapter(adapterNode);
 					adapterNode.notifyDataSetChanged();
-					mSelectedSensor.setText("Scenario[" + scenario.getId()+ "] " + SensorsFragement.selectedLocalSensor.getName());
+					mSelectedSensor.setText("Scenario[" + task.getId()+ "] " + SensorsFragement.selectedLocalSensor.getName());
 				}	
 			}
 
@@ -115,8 +114,8 @@ public class LocalSensorActivity extends BaseActivity {
             
         mConnectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if(localSensor != null && scenario != null){
-                	WaylayApplication.startPushing(localSensor, scenario.getId(), selectedNode);
+                if(localSensor != null && task != null){
+                	WaylayApplication.startPushing(localSensor, task.getId(), selectedNode);
                     finish();
                 }else{
                     Log.e(TAG,  "Sensor or Scenario is null");
@@ -127,13 +126,13 @@ public class LocalSensorActivity extends BaseActivity {
 		
 	}
 
-	private ArrayList<Scenario> filterScenarios(ArrayList<Scenario> scenarios) {
-		ArrayList<Scenario> filtered = new ArrayList<Scenario>();
-		for(Scenario scenario : scenarios ){
-			for(Node node : scenario.getNodes()){
+	private ArrayList<Task> filterScenarios(ArrayList<Task> tasks) {
+		ArrayList<Task> filtered = new ArrayList<Task>();
+		for(Task task : tasks){
+			for(Node node : task.getNodes()){
 				if(node.getSensorName() != null && 
 						node.getSensorName().startsWith(SensorsFragement.selectedLocalSensor.getName())){
-					filtered.add(scenario);
+					filtered.add(task);
 					break;
 				}	//TODO hack, later ask for runtime properties from the REST call 	
 				else if(node.getSensorName() != null && 
@@ -143,7 +142,7 @@ public class LocalSensorActivity extends BaseActivity {
                                 SensorsFragement.selectedLocalSensor.getName().startsWith("Location"))  ||
 						(node.getSensorName().startsWith("Tree") &&
                                 SensorsFragement.selectedLocalSensor.getName().startsWith("Location")) ) )    {
-					filtered.add(scenario);
+					filtered.add(task);
 					break;
 				}	//hack	
 			}

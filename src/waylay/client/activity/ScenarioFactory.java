@@ -4,40 +4,40 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import waylay.client.scenario.Scenario;
+import waylay.client.scenario.Task;
 
 public class ScenarioFactory {
 
-	private static final ArrayList<Scenario> scenarioList = new ArrayList<Scenario>();
+	private static final ArrayList<Task> TASK_LIST = new ArrayList<Task>();
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<Scenario> getsScenarios() {
-		return scenarioList;
+	public static ArrayList<Task> getsScenarios() {
+		return TASK_LIST;
 	}
 	
 	public static void clear(){
-		scenarioList.clear();
+		TASK_LIST.clear();
 	}
 	
-	public static void addScenario(Scenario scenario){
-		if(scenarioList.contains(scenario)){
-			removeScenario(scenario);
-			scenarioList.add(scenario);
-			Collections.sort(scenarioList);
+	public static void addScenario(Task task){
+		if(TASK_LIST.contains(task)){
+			removeScenario(task);
+			TASK_LIST.add(task);
+			Collections.sort(TASK_LIST);
 		}else {
-            scenarioList.add(scenario);
+            TASK_LIST.add(task);
         }
-        Collections.sort(scenarioList);
+        Collections.sort(TASK_LIST);
 	}
 
-    public static void addAll(Collection<Scenario> scenarios){
-        for(Scenario scenario:scenarios){
-            addScenario(scenario);
+    public static void addAll(Collection<Task> tasks){
+        for(Task task : tasks){
+            addScenario(task);
         }
     }
 	
-	public static void removeScenario(Scenario scenario){
-		scenarioList.remove(scenario);
+	public static void removeScenario(Task task){
+		TASK_LIST.remove(task);
 	}
 
 }
