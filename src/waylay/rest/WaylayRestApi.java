@@ -35,7 +35,7 @@ public interface WaylayRestApi {
             @Field("value") String value,
             Callback<Void> cb);
 
-    @POST("/tasks/{taskId}/{node}")
+    @POST("/tasks/{taskId}/nodes/{node}")
     @FormUrlEncoded
     void setTaskNodeProperty(
             @Path("taskId") Long taskId,

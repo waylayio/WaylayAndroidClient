@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.android.tools.build:gradle:0.12.+'
         classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
     }
 }
@@ -11,12 +11,13 @@ buildscript {
 // see https://github.com/JakeWharton/sdk-manager-plugin
 // This Gradle plugin will manage these SDK dependencies for you automatically.
 apply plugin: 'android-sdk-manager'
-apply plugin: 'android'
+apply plugin: 'com.android.application'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    repositories {
-        mavenCentral()
-    }
     compile fileTree(dir: 'libs', includes: ['estimote*.jar'])
     compile 'org.apache.commons:commons-math3:3.2'
 //    compile 'com.android.support:support-v4:19.1.+'
@@ -29,12 +30,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1"
+    compileSdkVersion 20
+    buildToolsVersion "20"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion 20
     }
 
     sourceSets {
