@@ -23,5 +23,5 @@ public abstract class AbstractLocalSensor implements IdentifiedSensor {
         IdentifiedSensor other = (IdentifiedSensor) obj;
 		return getId() == other.getId();
 	}
-	public abstract Map<String, String> getRuntimeData();
+	public abstract Map<String, Object> getData();
 }

@@ -89,9 +89,9 @@ public class AccelerometerSensor extends AbstractLocalSensor {
 	}
 
 	@Override
-	public Map<String, String> getRuntimeData() {
-		Map<String, String> map = new ConcurrentHashMap<String, String>();
-		map.put("runtime_accelerator", Double.toString(acceleration));
+	public Map<String, Object> getData() {
+		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
+		map.put("acceleration", acceleration);
 		return map;
 	}
 

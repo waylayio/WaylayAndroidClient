@@ -1,25 +1,39 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Setup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="waylay.client.activity.SetupFragment">
 
-    <LinearLayout android:id="@+id/Setup"
-        android:orientation="vertical"
+    <TextView
+        android:id="@+id/tvResourceId"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="6dp"
+        android:gravity="center"
+        android:text="[device resource id]"
+        android:textIsSelectable="true" />
+
+    <ListView
+        android:id="@+id/listSSO"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" />
 
-        <ListView android:id="@+id/listSSO"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical" />
+    <Button
+        android:id="@+id/buttonPushAll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/push_all" />
 
-        <Button android:id="@+id/buttonStopPushingData"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stop pushing data"/>
+    <Button
+        android:id="@+id/buttonStopPushingData"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_pushing" />
 
-    </LinearLayout>
+</LinearLayout>
 
-</FrameLayout>
+

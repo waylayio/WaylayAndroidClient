@@ -1,5 +1,6 @@
 package waylay.client.sensor;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -84,9 +85,9 @@ public class ForceSensor extends AbstractLocalSensor {
 	}
 
 	@Override
-	public Map<String, String> getRuntimeData() {
-		Map<String, String> map = new ConcurrentHashMap<String, String>();
-		map.put("runtime_force", Double.toString(force));
+	public Map<String, Object> getData() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("force", force);
 		return map;
 	}
 

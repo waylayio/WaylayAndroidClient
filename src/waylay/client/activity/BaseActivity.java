@@ -3,6 +3,8 @@ package waylay.client.activity;
 import android.app.Activity;
 import android.content.Intent;
 
+import waylay.client.WaylayApplication;
+
 public class BaseActivity extends Activity implements LoadingListener{
 
     //private ProgressDialog progress;
@@ -39,5 +41,9 @@ public class BaseActivity extends Activity implements LoadingListener{
 //            }
             setProgressBarIndeterminateVisibility(false);
         }
+    }
+
+    public WaylayApplication getWaylayApplication(){
+        return (WaylayApplication) getApplication();
     }
 }

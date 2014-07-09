@@ -59,10 +59,10 @@ public class RawSensor extends AbstractLocalSensor implements SensorEventListene
     }
 
     @Override
-    public Map<String, String> getRuntimeData() {
-        Map<String,String> data = new HashMap<String, String>();
+    public Map<String, Object> getData() {
+        Map<String,Object> data = new HashMap<String, Object>();
         if(lastEvent != null) {
-            data.put("values", Arrays.toString(lastEvent.values));
+            data.put(sensor.getName(), lastEvent.values);
         }
         return data;
     }

@@ -7,6 +7,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -113,11 +114,11 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
 		return "Location";
 	}
 	@Override
-	public Map<String, String> getRuntimeData() {
-		Map<String, String> map = new ConcurrentHashMap<String, String>();
+	public Map<String, Object> getData() {
+		Map<String, Object> map = new HashMap<String, Object>();
         if(location != null) {
-            map.put("runtime_latitude", Double.toString(location.getLatitude()));
-            map.put("runtime_longitude", Double.toString(location.getLongitude()));
+            map.put("latitude", Double.toString(location.getLatitude()));
+            map.put("longitude", Double.toString(location.getLongitude()));
         }
 		return map;
 	}

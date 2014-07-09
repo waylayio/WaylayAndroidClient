@@ -1,6 +1,7 @@
 package waylay.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -9,6 +10,7 @@ import retrofit.android.AndroidLog;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import waylay.client.data.BayesServer;
+import waylay.client.scenario.RawData;
 import waylay.client.scenario.Task;
 
 import android.util.Log;
@@ -25,6 +27,7 @@ public class WaylayRestClient {
 
 	private final BayesServer server;
     private final WaylayRestApi service;
+    private final Gson gson = new GsonBuilder().create();
 
     public WaylayRestClient(final BayesServer server) {
         this.server = server;
@@ -35,12 +38,11 @@ public class WaylayRestClient {
         service.performTaskAction(scenarioId, action, new RetrofitPostResponseCallback<Void>(callback));
 	}
 
-    public void postScenarioNodeValueAction(Long scenarioId, String node, String property, String value, final PostResponseCallback<Void> callback){
-        if(node == null){
-            service.setTaskProperty(scenarioId, property, value, new RetrofitPostResponseCallback<Void>(callback));
-        }else{
-            service.setTaskNodeProperty(scenarioId, node, property, value, new RetrofitPostResponseCallback<Void>(callback));
-        }
+    public void postResourceValue(String resource, Map<String, Object> data, final PostResponseCallback<Void> callback){
+        RawData rawData = new RawData();
+        rawData.setResource(resource);
+        rawData.setData(data);
+        service.postRawData(rawData, new RetrofitPostResponseCallback<Void>(callback));
     }
 	
 	public void deleteScenarioAction(final long scenarioId, final DeleteResponseCallback callback){
@@ -89,13 +91,12 @@ public class WaylayRestClient {
 
         @Override
         public void success(T value, Response response) {
-            callback.onDataReceived(value, false, null);
+            callback.onDataReceived(value);
         }
 
         @Override
         public void failure(RetrofitError retrofitError) {
-            Log.e(TAG, retrofitError.getMessage(), retrofitError);
-            callback.onDataReceived(null, true, retrofitError.getResponse().getStatus() + " - " + retrofitError.getMessage());
+            callback.onError(retrofitError);
         }
     }
 
@@ -108,13 +109,12 @@ public class WaylayRestClient {
 
         @Override
         public void success(T value, Response response) {
-            callback.onPostSuccess();
+            callback.onPostSuccess(value);
         }
 
         @Override
         public void failure(RetrofitError retrofitError) {
-            Log.e(TAG, retrofitError.getMessage(), retrofitError);
-            //callback.onDataReceived(null, true, retrofitError.getMessage());
+            callback.onPostFailure(retrofitError);
         }
     }
 
@@ -132,8 +132,7 @@ public class WaylayRestClient {
 
         @Override
         public void failure(RetrofitError retrofitError) {
-            Log.e(TAG, retrofitError.getMessage(), retrofitError);
-            callback.onDeleteFailure();
+            callback.onDeleteFailure(retrofitError);
         }
     }
 

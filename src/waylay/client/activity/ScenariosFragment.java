@@ -188,14 +188,23 @@ public class ScenariosFragment extends BaseFragment {
             }
         }
 
-        private void actioScenarioItem(String action) {
+        private void actioScenarioItem(final String action) {
             final Long id = selectedTask.getId();
             if(ACTION_STOP.equals(action) || ACTION_START.equals(action)){
                 WaylayApplication.getRestService().postScenarioAction(id, action, new PostResponseCallback<Void>(){
                     @Override
-                    public void onPostSuccess() {
+                    public void onPostSuccess(Void t) {
                         Log.i(TAG, "action was success");
                         getScenario(id);
+                    }
+
+                    @Override
+                    public void onPostFailure(Throwable t) {
+                        Log.e(TAG, "action failed", t);
+                        Activity activity = getActivity();
+                        if(activity != null) {
+                            Toast.makeText(activity, "Failed to perform action: " + action, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
             } else if(ACTION_DELETE.equals(action)){
@@ -209,7 +218,8 @@ public class ScenariosFragment extends BaseFragment {
                     }
 
                     @Override
-                    public void onDeleteFailure() {
+                    public void onDeleteFailure(Throwable t) {
+                        Log.e(TAG, t.getMessage(), t);
                         Activity activity = getActivity();
                         if(activity != null) {
                             Toast.makeText(activity, "Failed to delete scenario", Toast.LENGTH_SHORT).show();
@@ -235,16 +245,18 @@ public class ScenariosFragment extends BaseFragment {
 
         WaylayApplication.getRestService().getScenario(scenarioId, new GetResponseCallback<Task>() {
             @Override
-            public void onDataReceived(Task task, boolean error, String message) {
+            public void onDataReceived(Task task) {
                 Log.i(TAG, "Received response for scenario " + task);
-                if (!error) {
-                    ScenarioFactory.addScenario(task);
-                    mListener.endLoading();
-                    updateScenarios();
-                } else {
-                    mListener.endLoading();
-                    alert(message);
-                }
+                ScenarioFactory.addScenario(task);
+                mListener.endLoading();
+                updateScenarios();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Log.e(TAG, t.getMessage(), t);
+                mListener.endLoading();
+                alert(t.getMessage());
             }
         });
 
@@ -261,17 +273,18 @@ public class ScenariosFragment extends BaseFragment {
             mListener.startLoading();
             WaylayApplication.getRestService().getScenarios( new GetResponseCallback<List<Task>>() {
                 @Override
-                public void onDataReceived(List<Task> tasks, boolean error, String message) {
-                    if (!error) {
-                        Log.i(TAG, "Received response with " + tasks.size() + " scenarios");
-                        ScenarioFactory.addAll(tasks);
-                        mListener.endLoading();
-                        updateScenarios();
-                    } else {
-                        Log.e(TAG, message);
-                        mListener.endLoading();
-                        alert(message);
-                    }
+                public void onDataReceived(List<Task> tasks) {
+                    Log.i(TAG, "Received response with " + tasks.size() + " scenarios");
+                    ScenarioFactory.addAll(tasks);
+                    mListener.endLoading();
+                    updateScenarios();
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    Log.e(TAG, t.getMessage(), t);
+                    mListener.endLoading();
+                    alert(t.getMessage());
                 }
             });
         }else{

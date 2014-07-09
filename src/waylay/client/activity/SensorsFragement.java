@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.waylay.client.R;
 
@@ -24,7 +25,7 @@ import waylay.client.sensor.AbstractLocalSensor;
  * create an instance of this fragment.
  *
  */
-public class SensorsFragement extends Fragment {
+public class SensorsFragement extends WaylayFragment {
 
     private static final String TAG = "SensorsFragement";
 
@@ -92,8 +93,9 @@ public class SensorsFragement extends Fragment {
                 AbstractLocalSensor sensor = (AbstractLocalSensor) mLocalSensorList.getItemAtPosition(position);
                 selectedLocalSensor = sensor;
                 Log.d(TAG, "Selected sensor " + sensor.getName());
-                Intent i = new Intent(getActivity(), LocalSensorActivity.class);
-                startActivity(i);
+
+                getWaylayApplication().startPushing(selectedLocalSensor);
+                Toast.makeText(getActivity(), "Started pushing data for sensor " + selectedLocalSensor.getName(), Toast.LENGTH_SHORT).show();
             }
         });
 

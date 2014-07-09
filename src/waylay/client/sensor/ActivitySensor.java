@@ -46,8 +46,8 @@ public class ActivitySensor extends AbstractLocalSensor implements ActivityListe
     }
 
     @Override
-    public Map<String, String> getRuntimeData() {
-        Map data = new HashMap();
+    public Map<String, Object> getData() {
+        Map<String,Object> data = new HashMap<String,Object>();
         if(lastResult != null){
             data.put("confidence", lastResult.confidence);
             data.put("type", lastResult.type);
@@ -66,7 +66,7 @@ public class ActivitySensor extends AbstractLocalSensor implements ActivityListe
         if(lastResult == null){
             return "unknown";
         }
-        return getRuntimeData().toString();
+        return getData().toString();
     }
 
 

@@ -1,6 +1,9 @@
 package waylay.client.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,9 +16,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.waylay.client.R;
 
@@ -33,7 +40,7 @@ import waylay.client.data.BayesServer;
  * create an instance of this fragment.
  *
  */
-public class SetupFragment extends Fragment {
+public class SetupFragment extends WaylayFragment {
 
     private static final String TAG = "SetupFragment";
 
@@ -91,6 +98,42 @@ public class SetupFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_setup, container, false);
 
+        final TextView tvResourceId = (TextView) view.findViewById(R.id.tvResourceId);
+        tvResourceId.setText("Resource id: " + getWaylayApplication().getResourceId());
+        tvResourceId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+
+                alert.setTitle("Resource id");
+                alert.setMessage("Please enter a new resource id");
+
+                final EditText input = new EditText(getActivity());
+                input.setText(getWaylayApplication().getResourceId());
+                input.selectAll();
+                alert.setView(input);
+
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String value = input.getText().toString();
+                        getWaylayApplication().setResourceId(value);
+                        tvResourceId.setText("Resource id: " + getWaylayApplication().getResourceId());
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+                input.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }
+        });
+
         serverList = (ListView) view.findViewById(R.id.listSSO);
         adapterSetup = new SetupAdapter(getActivity(), WaylayApplication.servers);
         serverList.setAdapter(adapterSetup);
@@ -122,10 +165,16 @@ public class SetupFragment extends Fragment {
             }
         });
 
-
+        Button buttonPushAll = (Button) view.findViewById(R.id.buttonPushAll);
+        buttonPushAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.pushAll();
+                Toast.makeText(getActivity(), "Pushing all sensors", Toast.LENGTH_SHORT).show();
+            }
+        });
         Button buttonStopPushingData = (Button) view.findViewById(R.id.buttonStopPushingData);
         buttonStopPushingData.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 mListener.stopPush();
@@ -176,6 +225,8 @@ public class SetupFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         void stopPush();
+
+        void pushAll();
 
         void onServerChange();
     }

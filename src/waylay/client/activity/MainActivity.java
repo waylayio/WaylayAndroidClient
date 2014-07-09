@@ -160,8 +160,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     @Override
 	public void stopPush(){
-        WaylayApplication.stopPushing();
+        getWaylayApplication().stopPushing();
 	}
+
+    @Override
+    public void pushAll() {
+        for(AbstractLocalSensor sensor:listLocalSensors){
+            getWaylayApplication().startPushing(sensor);
+        }
+    }
 
     @Override
     public void onServerChange() {

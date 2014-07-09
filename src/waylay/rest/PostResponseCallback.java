@@ -7,10 +7,16 @@ package waylay.rest;
 * 
 */
 public interface PostResponseCallback <T>{
- /**
-  * Called when a POST success response is received. <br/>
-  * This method is guaranteed to execute on the UI thread.
-  */
- void onPostSuccess();
+     /**
+      * Called when a POST success response is received. <br/>
+      * This method is guaranteed to execute on the UI thread.
+      */
+     void onPostSuccess(T t);
+
+    /**
+     * Called when a DELETE failure response is received. <br/>
+     * This method is guaranteed to execute on the UI thread.
+     */
+    void onPostFailure(Throwable t);
 
 }

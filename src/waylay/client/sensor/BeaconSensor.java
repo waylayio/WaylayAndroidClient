@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -82,7 +83,7 @@ public class BeaconSensor extends AbstractLocalSensor {
     }
 
     @Override
-    public Map<String, String> getRuntimeData() {
+    public Map<String, Object> getData() {
         JsonObject data = new JsonObject();
         for (Beacon beacon : beacons) {
             data.addProperty("proximityUUID", beacon.getProximityUUID());
@@ -94,9 +95,9 @@ public class BeaconSensor extends AbstractLocalSensor {
             data.addProperty("rssi", beacon.getRssi());
         }
 
-        Map<String, String> map = new ConcurrentHashMap<String, String>();
+        Map<String, Object> map = new HashMap<String, Object>();
         Gson gson = new Gson();
-        map.put("runtime_beacons", gson.toJson(data));
+        map.put("beacons", data);
         return map;
     }
 

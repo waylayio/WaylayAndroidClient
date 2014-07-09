@@ -1,42 +1,25 @@
 package waylay.client;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-
-import org.apache.http.HttpStatus;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 import waylay.client.data.BayesServer;
 import waylay.client.sensor.AbstractLocalSensor;
 import waylay.rest.PostResponseCallback;
 import waylay.rest.WaylayRestClient;
-import waylay.rest.xively.DeviceList;
-import waylay.rest.xively.DeviceResponse;
-import waylay.rest.xively.Devices;
-import waylay.rest.xively.Serial;
-import waylay.rest.xively.XivelyError;
-import waylay.rest.xively.XivelyRestApi;
 import waylay.rest.xively.XivelyRestClient;
-import waylay.utils.UniqueId;
+import waylay.utils.ResourceId;
 
 public class WaylayApplication extends Application{
 
@@ -61,26 +44,33 @@ public class WaylayApplication extends Application{
         com.estimote.sdk.utils.L.enableDebugLogging(true);
         initServer();
 
-        final String uniqueId = UniqueId.get(this);
-
         final XivelyRestClient xively = new XivelyRestClient(XIVELY_API_KEY);
-        xively.makeSureDeviceExists(XIVELY_PRODUCT_ID, uniqueId, null);
+        xively.makeSureDeviceExists(XIVELY_PRODUCT_ID, ResourceId.get(this), null);
     }
 
     public static WaylayRestClient getRestService(){
         return new WaylayRestClient(selectedBayesServer);
     }
 
-    public static void startPushing(final AbstractLocalSensor localSensor, final Long id, final String node) {
-        Log.i(TAG, "start pushing data to scenario " + id + " , node " + node);
-        pushers.add(executorService.scheduleWithFixedDelay(new Pusher(id, node, localSensor), 0, PUSH_PERIOD, PUSH_TIMEUNIT));
+    public void startPushing(final AbstractLocalSensor localSensor) {
+        Log.i(TAG, "start pushing data for sensor " + localSensor.getName());
+        // TODO make sure we don't add a sensor twice
+        pushers.add(executorService.scheduleWithFixedDelay(new Pusher(ResourceId.get(this), localSensor), 0, PUSH_PERIOD, PUSH_TIMEUNIT));
     }
 
-    public static void stopPushing(){
+    public void stopPushing(){
         Log.i(TAG, "stop pushing all data");
         for(ScheduledFuture<?> pusher:pushers){
             pusher.cancel(true);
         }
+    }
+
+    public String getResourceId() {
+        return ResourceId.get(this);
+    }
+
+    public void setResourceId(String resourceId) {
+        ResourceId.set(this, resourceId);
     }
 
     public static BayesServer getSelectedServer() {
@@ -104,16 +94,14 @@ public class WaylayApplication extends Application{
 
     private static class Pusher implements Runnable{
 
-        private final long scenarioId;
-        private final String node;
+        private final String resource;
         private final AbstractLocalSensor sensor;
 
         // keep this around as we don' want to suddenly change servers
         private final WaylayRestClient service;
 
-        private Pusher(final long scenarioId, final String node, final AbstractLocalSensor sensor) {
-            this.scenarioId = scenarioId;
-            this.node = node;
+        private Pusher(final String resource, final AbstractLocalSensor sensor) {
+            this.resource = resource;
             this.sensor = sensor;
             this.service =  WaylayApplication.getRestService();
         }
@@ -121,17 +109,19 @@ public class WaylayApplication extends Application{
         @Override
         public void run() {
             try {
-                Map<String, String> mapping = sensor.getRuntimeData();
-                for (Map.Entry<String, String> entry : mapping.entrySet()) {
-                    final Map.Entry<String, String> finalEntry = entry;
-                    Log.i(TAG, "pushing data from " + sensor.getName() + ", send runtime_property " + finalEntry.getKey() + " = " + finalEntry.getValue());
-                    service.postScenarioNodeValueAction(scenarioId, node, finalEntry.getKey(), finalEntry.getValue(), new PostResponseCallback() {
-                        @Override
-                        public void onPostSuccess() {
-                            Log.i(TAG, "pushed data from " + sensor.getName() + ", send runtime_property " + finalEntry);
-                        }
-                    });
-                }
+                final Map<String, Object> data = sensor.getData();
+                Log.i(TAG, "--> pushing data from " + sensor.getName() + ", sending " + data);
+                service.postResourceValue(resource, data, new PostResponseCallback<Void>() {
+                    @Override
+                    public void onPostSuccess(Void t) {
+                        Log.i(TAG, "<-- pushed data from " + sensor.getName() + ", sent " + data);
+                    }
+
+                    @Override
+                    public void onPostFailure(Throwable t) {
+                        Log.e(TAG, "failed to push data from " + sensor.getName() + ", sent " + data, t);
+                    }
+                });
             }catch (Exception ex){
                 Log.e(TAG, ex.getMessage(), ex);
             }

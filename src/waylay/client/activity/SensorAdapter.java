@@ -27,18 +27,20 @@ public class SensorAdapter extends ArrayAdapter<AbstractLocalSensor> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
-		TextView textHost = (TextView) rowView.findViewById(R.id.title);
-		TextView textStatus = (TextView) rowView.findViewById(R.id.subtitle);
-		TextView textAddress = (TextView) rowView.findViewById(R.id.rightcorner);
-		ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-		textHost.setText(values.get(position).getName());
-		textStatus.setText(values.get(position).toString());
-		textAddress.setText(values.get(position).getStatus());
-		AbstractLocalSensor m = values.get(position);
-		imageView.setImageResource(R.drawable.sensor);
-		return rowView;
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.rowlayout, parent, false);
+        }
+        TextView textHost = (TextView) convertView.findViewById(R.id.title);
+        TextView textStatus = (TextView) convertView.findViewById(R.id.subtitle);
+        TextView textAddress = (TextView) convertView.findViewById(R.id.rightcorner);
+        ImageView imageView = (ImageView) convertView.findViewById(R.id.icon);
+        AbstractLocalSensor sensor = values.get(position);
+        textHost.setText(sensor.getName());
+        textStatus.setText(sensor.toString());
+        textAddress.setText(sensor.getStatus());
+        // TODO show other image when pushing
+        imageView.setImageResource(R.drawable.sensor);
+		return convertView;
 	}
 }
