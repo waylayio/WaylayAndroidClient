@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.waylay.client"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="0.1.0" >
     
     <supports-screens android:resizeable="true"
                   android:anyDensity="true" />
@@ -12,6 +12,12 @@
    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- for crittercism -->
+    <!--<uses-permission android:name="android.permission.INTERNET"/>-->
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <!--<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>-->
+    <uses-permission android:name="android.permission.GET_TASKS"/>
 
     <!-- for the beacons -->
     <uses-permission android:name="android.permission.BLUETOOTH"/>
@@ -37,11 +43,9 @@
         <activity android:name="waylay.client.activity.ScenarioActivity" />
         <activity android:name="waylay.client.activity.SetupActivity" />
         <activity android:name="waylay.client.activity.AlertDialogActivity" />
-        <activity android:name="waylay.client.activity.LocalSensorActivity" />
 
         <!-- FIXME Estimote broken on pre 4.3 devices: https://github.com/Estimote/Android-SDK/issues/48 -->
-        <!--<service android:name="com.estimote.sdk.service.BeaconService"-->
-            <!--android:exported="false"/>-->
+        <!--<service android:name="com.estimote.sdk.service.BeaconService" android:exported="false"/>-->
 
         <service
             android:name="waylay.client.service.ActivityRecognitionIntentService"

@@ -1,11 +1,16 @@
 package waylay.client.scenario;
 
+import java.util.List;
 import java.util.Map;
 
 public class RawData {
 
     private String resource;
-    private Map<String, Object> data;
+    private Object data;
+
+    public RawData(String resource) {
+        this.resource = resource;
+    }
 
     public String getResource() {
         return resource;
@@ -15,11 +20,15 @@ public class RawData {
         this.resource = resource;
     }
 
-    public Map<String, Object> getData() {
+    public Object getData() {
         return data;
     }
 
     public void setData(Map<String, Object> data) {
+        this.data = data;
+    }
+
+    public void setData(List<Map<String, Object>> data) {
         this.data = data;
     }
 }

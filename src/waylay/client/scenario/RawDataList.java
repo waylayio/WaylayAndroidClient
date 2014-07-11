@@ -4,6 +4,10 @@ public class RawDataList {
 
     private String resource;
 
+    public RawDataList(String resource) {
+        this.resource = resource;
+    }
+
     public String getResource() {
         return resource;
     }

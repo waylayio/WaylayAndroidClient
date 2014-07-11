@@ -65,7 +65,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     private SensorManager sensorManager;
     private LocationManager locationManager;
-    private BeaconManager beaconManager;
+    //private BeaconManager beaconManager;
     private ActivityManager activityManager;
 
     @Override
@@ -79,7 +79,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        beaconManager = new BeaconManager(getApplicationContext());
+        //beaconManager = new BeaconManager(getApplicationContext());
         activityManager = new ActivityManager(getApplicationContext());
 
         initLocalSensors();
@@ -265,7 +265,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         listLocalSensors.add(activitySensor);
 
         for(Sensor sensor:sensorManager.getSensorList(Sensor.TYPE_ALL)){
-            Log.i(TAG, sensor.getType() + " " + sensor.getName());
+            // TODO find out how to know a sensor is a trigger sensor: Trigger Sensors should use the requestTriggerSensor
+            Log.i(TAG, "Adding raw sensor " + sensor.getType() + " " + sensor.getName());
             listLocalSensors.add(new RawSensor(sensor));
         }
     }
@@ -288,7 +289,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         SensorListener buffered = new BufferingSensorListener(this, 1, TimeUnit.SECONDS);
 
         locationSensor.start(locationManager, buffered);
-        beaconSensor.start(beaconManager, buffered);
+        //beaconSensor.start(beaconManager, buffered);
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this,
@@ -308,7 +309,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     private void stopSensors() {
         locationSensor.stop(locationManager);
-        beaconSensor.stop(beaconManager);
+        //beaconSensor.stop(beaconManager);
         sensorManager.unregisterListener(this);
         for(AbstractLocalSensor sensor:listLocalSensors){
             if(sensor instanceof RawSensor){

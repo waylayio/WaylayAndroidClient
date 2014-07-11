@@ -4,6 +4,8 @@ import android.app.Application;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.crittercism.app.Crittercism;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +43,7 @@ public class WaylayApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
+        Crittercism.initialize(getApplicationContext(), "53bfecd683fb790c3c000004");
         com.estimote.sdk.utils.L.enableDebugLogging(true);
         initServer();
 
@@ -88,6 +91,7 @@ public class WaylayApplication extends Application{
         if(servers.size() == 0) {
             servers.add(new BayesServer("app.waylay.io", "admin", "admin"));
             servers.add(new BayesServer("107.170.20.30", "admin", "admin"));
+            servers.add(new BayesServer("10.10.131.177:8888/rest/bn", "admin", "admin"));
         }
         selectedBayesServer = servers.get(0);
     }

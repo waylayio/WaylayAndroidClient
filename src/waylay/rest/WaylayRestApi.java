@@ -24,15 +24,11 @@ public interface WaylayRestApi {
     void getTask(@Path("taskId") Long taskId, Callback<Task> cb);
 
     @DELETE("/tasks/{taskId}")
-    void deleteTask(@Path("v") Long taskId, Callback<Void> cb);
+    void deleteTask(@Path("taskId") Long taskId, Callback<Void> cb);
 
-    @POST("/tasks/{taskId}")
-    @FormUrlEncoded
-    void performTaskAction(@Path("taskId") Long taskId, @Field("action") String action, Callback<Void> cb);
+    @POST("/tasks/{taskId}/command/{action}")
+    void performTaskAction(@Path("taskId") Long taskId, @Path("action") String action, Callback<Void> cb);
 
     @POST("/data")
     void postRawData(@Body RawData data, Callback<Void> cb);
-
-    @POST("/data")
-    void postRawDataList(@Body RawDataList dataList, Callback<Void> cb);
 }

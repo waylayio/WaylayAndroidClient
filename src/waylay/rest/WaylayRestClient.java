@@ -1,5 +1,7 @@
 package waylay.rest;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +29,6 @@ public class WaylayRestClient {
 
 	private final BayesServer server;
     private final WaylayRestApi service;
-    private final Gson gson = new GsonBuilder().create();
 
     public WaylayRestClient(final BayesServer server) {
         this.server = server;
@@ -38,10 +39,18 @@ public class WaylayRestClient {
         service.performTaskAction(scenarioId, action, new RetrofitPostResponseCallback<Void>(callback));
 	}
 
-    public void postResourceValue(String resource, Map<String, Object> data, final PostResponseCallback<Void> callback){
-        RawData rawData = new RawData();
-        rawData.setResource(resource);
-        rawData.setData(data);
+    public void postResourceValue(String resource, Map<String, Object> sensorData, final PostResponseCallback<Void> callback){
+        RawData rawData = new RawData(resource);
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        for(Map.Entry<String, Object> entry:sensorData.entrySet()) {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("collectedTime", System.currentTimeMillis());
+            data.put("validPeriodSecs", 60);
+            data.put("parameterName", entry.getKey());
+            data.put("value", entry.getValue());
+            list.add(data);
+        }
+        rawData.setData(list);
         service.postRawData(rawData, new RetrofitPostResponseCallback<Void>(callback));
     }
 	
@@ -68,7 +77,7 @@ public class WaylayRestClient {
                 .create();
 
         RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(apiBase())
+                .setEndpoint(server.apiBase())
                 .setRequestInterceptor(new BasicAuthorizationInterceptor(server.getName(), server.getPassword()))
                 .setProfiler(new RequestLoggingProfiler(TAG))
                 .setLogLevel(RestAdapter.LogLevel.FULL)
@@ -78,8 +87,16 @@ public class WaylayRestClient {
         return restAdapter.create(WaylayRestApi.class);
     }
 
-    private String apiBase() {
-        return  "http://" + server.getHost() + "/api";
+    /**
+     * Makes sure unexpected errors crash the app
+     * https://github.com/square/retrofit/issues/560
+     * @param retrofitError the retrofit error
+     */
+    private static void failOnUnexpectedError(RetrofitError retrofitError) {
+        // see RetrofitError.unexpectedError() for reasoning
+        if(!retrofitError.isNetworkError() && retrofitError.getResponse() == null){
+            throw new RuntimeException(retrofitError.getMessage(), retrofitError);
+        }
     }
 
     private static class RetrofitGetResponseCallback <T> implements Callback<T> {
@@ -96,6 +113,7 @@ public class WaylayRestClient {
 
         @Override
         public void failure(RetrofitError retrofitError) {
+            failOnUnexpectedError(retrofitError);
             callback.onError(retrofitError);
         }
     }
@@ -114,6 +132,7 @@ public class WaylayRestClient {
 
         @Override
         public void failure(RetrofitError retrofitError) {
+            failOnUnexpectedError(retrofitError);
             callback.onPostFailure(retrofitError);
         }
     }
@@ -132,6 +151,7 @@ public class WaylayRestClient {
 
         @Override
         public void failure(RetrofitError retrofitError) {
+            failOnUnexpectedError(retrofitError);
             callback.onDeleteFailure(retrofitError);
         }
     }

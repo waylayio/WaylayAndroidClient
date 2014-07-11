@@ -23,9 +23,9 @@ public class ForceSensor extends AbstractLocalSensor {
 		this(false);
 	}
 	
-	public ForceSensor(boolean comensate) {
+	public ForceSensor(boolean compensate) {
 		super();
-		if(comensate){
+		if(compensate){
 		    LowPassFilter lpfAcceleration = null;
 		    MeanFilter meanFilterAcceleration = null;
 		    float accelerationLPFAlpha = 0.4f;
