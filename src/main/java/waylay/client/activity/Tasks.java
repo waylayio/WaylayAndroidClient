@@ -6,7 +6,7 @@ import java.util.Collections;
 
 import waylay.client.scenario.Task;
 
-public class ScenarioFactory {
+public class Tasks {
 
 	private static final ArrayList<Task> TASK_LIST = new ArrayList<Task>();
 

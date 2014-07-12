@@ -27,13 +27,14 @@ public class NodeAdapter extends ArrayAdapter<Node> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
-		TextView textTitle = (TextView) rowView.findViewById(R.id.title);
-		TextView textStatus = (TextView) rowView.findViewById(R.id.subtitle);
-		TextView textID = (TextView) rowView.findViewById(R.id.rightcorner);
-		ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.rowlayout, parent, false);
+        }
+		TextView textTitle = (TextView) convertView.findViewById(R.id.title);
+		TextView textStatus = (TextView) convertView.findViewById(R.id.subtitle);
+		TextView textID = (TextView) convertView.findViewById(R.id.rightcorner);
+		ImageView imageView = (ImageView) convertView.findViewById(R.id.icon);
 		Node node = values.get(position);
 		//Map<String, Double> nodeStates = node.getStates();
 		String name = node.getName(); 
@@ -43,15 +44,13 @@ public class NodeAdapter extends ArrayAdapter<Node> {
 		if (node.getName().equals(ScenariosFragment.selectedTask.getTargetNode())) {
 			imageView.setImageResource(R.drawable.trigger);
 		} else {
-			try {
-				Field field = R.drawable.class.getDeclaredField(node.getSensorName().toLowerCase());
-				int a = field.getInt(this);
-				imageView.setImageResource(a);
-			} catch (Exception e) {
-				imageView.setImageResource(R.drawable.sensor);
-			}
+            int resourceID = context.getResources().getIdentifier("node.getSensorName().toLowerCase()", "drawable", context.getPackageName());
+			if(resourceID == 0){
+                resourceID = R.drawable.sensor;
+            }
+            imageView.setImageResource(resourceID);
 		}
 
-		return rowView;
+		return convertView;
 	}
 }

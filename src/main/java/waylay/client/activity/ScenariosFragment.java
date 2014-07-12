@@ -78,7 +78,7 @@ public class ScenariosFragment extends BaseFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_scenarios, container, false);
 
-        adapterScenarios = new ScenarioAdapter(getActivity(), ScenarioFactory.getsScenarios());
+        adapterScenarios = new ScenarioAdapter(getActivity(), Tasks.getsScenarios());
 
         mScenarioList = (ListView) view.findViewById(R.id.listMachines);
         mScenarioList.setAdapter(adapterScenarios);
@@ -212,9 +212,9 @@ public class ScenariosFragment extends BaseFragment {
                     @Override
                     public void onDeleteSuccess() {
                         Log.i(TAG, "action was success");
-                        ScenarioFactory.removeScenario(selectedTask);
+                        Tasks.removeScenario(selectedTask);
+                        notifyTasksChanged();
                         selectedTask = null;
-                        updateScenarios();
                     }
 
                     @Override
@@ -224,7 +224,7 @@ public class ScenariosFragment extends BaseFragment {
                         if(activity != null) {
                             Toast.makeText(activity, "Failed to delete scenario", Toast.LENGTH_SHORT).show();
                         }
-                        updateScenarios();
+                        notifyTasksChanged();
                     }
                 });
             }
@@ -247,9 +247,9 @@ public class ScenariosFragment extends BaseFragment {
             @Override
             public void onDataReceived(Task task) {
                 Log.i(TAG, "Received response for scenario " + task);
-                ScenarioFactory.addScenario(task);
+                Tasks.addScenario(task);
+                notifyTasksChanged();
                 mListener.endLoading();
-                updateScenarios();
             }
 
             @Override
@@ -261,23 +261,24 @@ public class ScenariosFragment extends BaseFragment {
         });
 
     }
-    protected void updateScenarios() {
+    protected void notifyTasksChanged() {
         adapterScenarios.notifyDataSetChanged();
     }
 
     public void refreshAllScenarios(){
         if(WaylayApplication.getSelectedServer() != null) {
             Log.d(TAG, "refreshAllScenarios");
-            ScenarioFactory.clear();
+            Tasks.clear();
+            notifyTasksChanged();
 
             mListener.startLoading();
             WaylayApplication.getRestService().getScenarios( new GetResponseCallback<List<Task>>() {
                 @Override
                 public void onDataReceived(List<Task> tasks) {
                     Log.i(TAG, "Received response with " + tasks.size() + " scenarios");
-                    ScenarioFactory.addAll(tasks);
+                    Tasks.addAll(tasks);
+                    notifyTasksChanged();
                     mListener.endLoading();
-                    updateScenarios();
                 }
 
                 @Override

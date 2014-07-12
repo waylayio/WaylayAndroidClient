@@ -27,20 +27,18 @@ public class ScenarioAdapter extends ArrayAdapter<Task> {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		LayoutInflater inflater = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View rowView = inflater.inflate(R.layout.rowlayout, parent, false);
-		TextView textTitle = (TextView) rowView.findViewById(R.id.title);
-		TextView textStatus = (TextView) rowView.findViewById(R.id.subtitle);
-		TextView textID = (TextView) rowView.findViewById(R.id.rightcorner);
-		ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.rowlayout, parent, false);
+        }
+		TextView textTitle = (TextView) convertView.findViewById(R.id.title);
+		TextView textStatus = (TextView) convertView.findViewById(R.id.subtitle);
+		TextView textID = (TextView) convertView.findViewById(R.id.rightcorner);
+		ImageView imageView = (ImageView) convertView.findViewById(R.id.icon);
 		textTitle.setText(values.get(position).getName());
 		textStatus.setText(values.get(position).getScenarioStatus().toString());
-		if("null".equals(textID) || textID == null){
-			textID.setText("");
-		} else {
-			textID.setText(values.get(position).getId().toString());
-		}
+	    textID.setText(values.get(position).getId().toString());
+
 		Task m = values.get(position);
 		if (!m.getScenarioStatus().equals(ScenarioStatus.RUNNING)) {
 			imageView.setImageResource(R.drawable.nok);
@@ -48,6 +46,6 @@ public class ScenarioAdapter extends ArrayAdapter<Task> {
 			imageView.setImageResource(R.drawable.ok);
 		}
 
-		return rowView;
+		return convertView;
 	}
 }
