@@ -75,6 +75,7 @@ public class SensorsFragement extends WaylayFragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        this.adapterLocalSensors = new SensorAdapter(getActivity(), MainActivity.listLocalSensors);
     }
 
     @Override
@@ -82,8 +83,6 @@ public class SensorsFragement extends WaylayFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sensors, container, false);
-
-        this.adapterLocalSensors = new SensorAdapter(getActivity(), MainActivity.listLocalSensors);
 
         mLocalSensorList = (ListView) view.findViewById(R.id.listUsers);
         mLocalSensorList.setAdapter(adapterLocalSensors);
@@ -134,7 +133,10 @@ public class SensorsFragement extends WaylayFragment {
     }
 
     public void update(){
-        adapterLocalSensors.notifyDataSetChanged();
+        // had this case before
+        if(adapterLocalSensors != null) {
+            adapterLocalSensors.notifyDataSetChanged();
+        }
     }
 
 
