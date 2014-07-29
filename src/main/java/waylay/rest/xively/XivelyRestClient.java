@@ -5,7 +5,10 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
+
+import java.io.IOException;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -22,6 +25,7 @@ public class XivelyRestClient {
     protected static final String TAG = XivelyRestClient.class.getSimpleName();
 
     private static final String API_BASE = "https://api.xively.com/";
+    private static final int MAX_ERROR_BODY_REPORTED_CHARS = 500;
 
     private final XivelyRestApi restClient;
 
@@ -60,21 +64,39 @@ public class XivelyRestClient {
 
                                 @Override
                                 public void failure(RetrofitError error) {
-                                    Log.e(TAG, error.getMessage(), error);
+                                    logError(error);
                                 }
                             });
                         }
 
                         @Override
                         public void failure(RetrofitError error) {
-                            Log.e(TAG, ((XivelyError)error.getBodyAs(XivelyError.class)).errors, error);
+                            logError(error);
                         }
                     });
                 }else {
-                    Log.e(TAG, ((XivelyError)error.getBodyAs(XivelyError.class)).errors, error);
+                    logError(error);
                 }
             }
         });
+    }
+
+    private void logError(RetrofitError error) {
+        String prefix = error.getResponse().getStatus() + " for " + error.getUrl() + " " + error.getResponse().getReason() + " | ";
+        // sometimes the body is non-json
+        if(error.getResponse().getBody().mimeType().contains("application/json")){
+            XivelyError xivelyError = (XivelyError) error.getBodyAs(XivelyError.class);
+            Log.e(TAG, prefix + xivelyError.errors, error);
+        }else{
+            String body = "[???]";
+            try {
+                body = IOUtils.toString(error.getResponse().getBody().in());
+                body = take(body, MAX_ERROR_BODY_REPORTED_CHARS);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+            Log.e(TAG, prefix + body, error);
+        }
     }
 
     private XivelyRestApi createRestClient(final String apiKey) {
@@ -92,5 +114,12 @@ public class XivelyRestClient {
                 .setConverter(new GsonConverter(gson))
                 .build();
         return restAdapter.create(XivelyRestApi.class);
+    }
+
+    private String take(String from, int max){
+        if(from.length() > max){
+            return from.substring(0, max);
+        }
+        return from;
     }
 }
