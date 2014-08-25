@@ -116,13 +116,11 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
 
 	@Override
 	public Map<String, Object> getData() {
-		Map<String, Object> locationObject = new HashMap<String, Object>();
-        if(location != null) {
-            locationObject.put("latitude", Double.toString(location.getLatitude()));
-            locationObject.put("longitude", Double.toString(location.getLongitude()));
-        }
         Map<String, Object> data = new HashMap<String, Object>();
-        data.put("location", locationObject);
+        if(location != null) {
+            data.put("latitude", Double.toString(location.getLatitude()));
+            data.put("longitude", Double.toString(location.getLongitude()));
+        }
 		return data;
 	}
 
