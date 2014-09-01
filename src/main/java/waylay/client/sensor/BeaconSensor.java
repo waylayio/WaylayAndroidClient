@@ -35,32 +35,39 @@ public class BeaconSensor extends AbstractLocalSensor {
     }
 
     public void start(final BeaconManager beaconManager, final SensorListener listener){
-        Log.i(TAG, "Starting " + this + " with " + beaconManager);
         this.listener = listener;
 
-        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
-            @Override
-            public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
-                updateData(beacons);
-            }
-        });
-
-        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
-            @Override public void onServiceReady() {
-                try {
-                    beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
-                    active = true;
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Cannot start ranging", e);
-                    active = false;
+        if(beaconManager.hasBluetooth()) {
+            Log.i(TAG, "Starting " + this + " with " + beaconManager);
+            beaconManager.setRangingListener(new BeaconManager.RangingListener() {
+                @Override
+                public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
+                    updateData(beacons);
                 }
-            }
-        });
+            });
+
+            beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+                @Override
+                public void onServiceReady() {
+                    try {
+                        beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
+                        active = true;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Cannot start ranging", e);
+                        active = false;
+                    }
+                }
+            });
+        }else{
+            Log.e(TAG, "Can't start ranging as the device does not support bluetooth le");
+        }
     }
 
     public void stop(final BeaconManager beaconManager){
-        Log.i(TAG, "Stopping " + this + " with " + beaconManager);
-        beaconManager.disconnect();
+        if(active) {
+            Log.i(TAG, "Stopping " + this + " with " + beaconManager);
+            beaconManager.disconnect();
+        }
         active = false;
         this.listener = null;
     }
