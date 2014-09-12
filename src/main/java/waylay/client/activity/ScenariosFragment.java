@@ -249,18 +249,26 @@ public class ScenariosFragment extends BaseFragment {
                 Log.i(TAG, "Received response for scenario " + task);
                 Tasks.addScenario(task);
                 notifyTasksChanged();
-                mListener.endLoading();
+                endLoading();
             }
 
             @Override
             public void onError(Throwable t) {
                 Log.e(TAG, t.getMessage(), t);
-                mListener.endLoading();
+                endLoading();
                 alert(t.getMessage());
             }
         });
 
     }
+
+    private void endLoading() {
+        // this is called in callbacks and the UI might be detached/closed by this time
+        if(mListener != null) {
+            mListener.endLoading();
+        }
+    }
+
     protected void notifyTasksChanged() {
         adapterScenarios.notifyDataSetChanged();
     }
@@ -278,13 +286,13 @@ public class ScenariosFragment extends BaseFragment {
                     Log.i(TAG, "Received response with " + tasks.size() + " scenarios");
                     Tasks.addAll(tasks);
                     notifyTasksChanged();
-                    mListener.endLoading();
+                    endLoading();
                 }
 
                 @Override
                 public void onError(Throwable t) {
                     Log.e(TAG, t.getMessage(), t);
-                    mListener.endLoading();
+                    endLoading();
                     alert(t.getMessage());
                 }
             });
