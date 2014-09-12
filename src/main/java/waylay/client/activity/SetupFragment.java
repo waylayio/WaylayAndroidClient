@@ -264,7 +264,7 @@ public class SetupFragment extends WaylayFragment {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.layout.menu_sso, menu);
+            inflater.inflate(R.menu.menu_sso, menu);
             return true;
         }
 

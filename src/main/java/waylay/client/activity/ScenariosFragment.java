@@ -155,7 +155,7 @@ public class ScenariosFragment extends BaseFragment {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.layout.menu_scenario, menu);
+            inflater.inflate(R.menu.menu_scenario, menu);
 
             return true;
         }

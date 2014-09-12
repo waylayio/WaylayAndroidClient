@@ -3,7 +3,7 @@ package waylay.client.scenario;
 import java.util.ArrayList;
 
 
-public class Task implements Comparable{
+public class Task implements Comparable<Task>{
     private String name;
     private String targetNode;
     private Long id;
@@ -99,8 +99,7 @@ public class Task implements Comparable{
     }
 
 	@Override
-	public int compareTo(Object arg0) {
-		Task o2 = (Task) arg0;
-		return this.id.compareTo(o2.id);
+	public int compareTo(Task other) {
+		return this.id.compareTo(other.id);
 	}
 }
