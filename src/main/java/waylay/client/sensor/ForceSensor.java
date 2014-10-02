@@ -86,9 +86,9 @@ public class ForceSensor extends AbstractLocalSensor {
 
 	@Override
 	public Map<String, Object> getData() {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("force", force);
-		return map;
+        Map<String, Object> data = new HashMap<String, Object>();
+		data.put("force", force);
+		return data;
 	}
 
 }

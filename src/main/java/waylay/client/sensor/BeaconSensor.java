@@ -91,21 +91,18 @@ public class BeaconSensor extends AbstractLocalSensor {
 
     @Override
     public Map<String, Object> getData() {
-        JsonObject data = new JsonObject();
-        for (Beacon beacon : beacons) {
-            data.addProperty("proximityUUID", beacon.getProximityUUID());
-            data.addProperty("name", beacon.getName());
-            data.addProperty("macAddress", beacon.getMacAddress());
-            data.addProperty("major", beacon.getMajor());
-            data.addProperty("minor", beacon.getMinor());
-            data.addProperty("power", beacon.getMeasuredPower());
-            data.addProperty("rssi", beacon.getRssi());
-        }
+        Map<String,Object> data = new HashMap<String,Object>();
+        for(Beacon beacon : beacons){
+            data.put("proximityUUID", beacon.getProximityUUID());
+            data.put("name", beacon.getName());
+            data.put("macAddress", beacon.getMacAddress());
+            data.put("major", beacon.getMajor());
+            data.put("minor", beacon.getMinor());
+            data.put("power", beacon.getMeasuredPower());
+            data.put("rssi", beacon.getRssi());
 
-        Map<String, Object> map = new HashMap<String, Object>();
-        Gson gson = new Gson();
-        map.put("beacons", data);
-        return map;
+        }
+        return data;
     }
 
     private void updateData(final List<Beacon> beacons) {

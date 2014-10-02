@@ -47,8 +47,8 @@ public class WaylayApplication extends Application{
         com.estimote.sdk.utils.L.enableDebugLogging(true);
         initServer();
 
-        final XivelyRestClient xively = new XivelyRestClient(XIVELY_API_KEY);
-        xively.makeSureDeviceExists(XIVELY_PRODUCT_ID, ResourceId.get(this), null);
+        //final XivelyRestClient xively = new XivelyRestClient(XIVELY_API_KEY);
+        //xively.makeSureDeviceExists(XIVELY_PRODUCT_ID, ResourceId.get(this), null);
     }
 
     public static WaylayRestClient getRestService(){

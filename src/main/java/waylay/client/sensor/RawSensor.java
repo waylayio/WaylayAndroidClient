@@ -62,7 +62,8 @@ public class RawSensor extends AbstractLocalSensor implements SensorEventListene
     public Map<String, Object> getData() {
         Map<String,Object> data = new HashMap<String, Object>();
         if(lastEvent != null) {
-            data.put(sensor.getName(), lastEvent.values);
+            for(int i =0; i< lastEvent.values.length;i++)
+                data.put(sensor.getName(), lastEvent.values[i]);
         }
         return data;
     }

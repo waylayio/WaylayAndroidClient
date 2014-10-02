@@ -18,22 +18,28 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
     // The minimum distance to change Updates in meters
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 10 * 1; // 10 seconds
 
     private String provider = LocationManager.NETWORK_PROVIDER;
 
 	private Location location;
 
     private SensorListener listener;
+
+    private LocationManager locationManager;
 	
 	public LocationSensor(){
 		
 	}
 
-    public void start(final LocationManager locationManager, final SensorListener listener) {
+    public void start(LocationManager locationManager, final SensorListener listener) {
         Log.i(TAG, "Starting " + this + " with " + locationManager);
         this.listener = listener;
+        this.locationManager = locationManager;
+        init();
+    }
 
+    private void init() {
         // TODO what should be done with this
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE);
@@ -45,9 +51,6 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
         // getting network status
         boolean isNetworkEnabled = locationManager
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        Location location = null;
-
-
         if (!isGPSEnabled && !isNetworkEnabled) {
             // no network provider is enabled
         } else {
@@ -120,6 +123,8 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
         if(location != null) {
             data.put("latitude", Double.toString(location.getLatitude()));
             data.put("longitude", Double.toString(location.getLongitude()));
+        } else {
+            init();
         }
 		return data;
 	}
