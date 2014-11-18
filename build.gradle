@@ -4,7 +4,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.13.2'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.0'
     }
 }
 
@@ -21,14 +21,17 @@ dependencies {
     compile fileTree(dir: 'libs', includes: ['estimote*.jar'])
     compile 'org.apache.commons:commons-math3:3.2'
     compile 'commons-io:commons-io:2.4'
-//    compile 'com.android.support:support-v4:19.1.+'
-//    compile 'com.android.support:appcompat-v7:19.1.+'
+
+    // only added to trigger a download (needed by play services)
+    compile 'com.android.support:support-v4:21.0.0'
+    compile 'com.android.support:appcompat-v7:21.0.0'
+
     compile 'com.google.android.gms:play-services:6.1.71'
-    compile 'com.squareup.retrofit:retrofit:1.6.1'
-    compile 'com.squareup.okhttp:okhttp:2.0.0'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
+    compile 'com.squareup.retrofit:retrofit:1.7.1'
+    compile 'com.squareup.okhttp:okhttp:2.1.0'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.1.0'
     compile 'com.google.code.gson:gson:2.3'
-    compile 'com.crittercism:crittercism-android-agent:+'
+    compile 'com.crittercism:crittercism-android-agent:5.0.3'
 }
 
 android {
