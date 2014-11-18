@@ -21,11 +21,6 @@ dependencies {
     compile fileTree(dir: 'libs', includes: ['estimote*.jar'])
     compile 'org.apache.commons:commons-math3:3.2'
     compile 'commons-io:commons-io:2.4'
-
-    // only added to trigger a download (needed by play services)
-    compile 'com.android.support:support-v4:21.0.0'
-    compile 'com.android.support:appcompat-v7:21.0.0'
-
     compile 'com.google.android.gms:play-services:6.1.71'
     compile 'com.squareup.retrofit:retrofit:1.7.1'
     compile 'com.squareup.okhttp:okhttp:2.1.0'
