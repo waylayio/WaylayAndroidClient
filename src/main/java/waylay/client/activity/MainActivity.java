@@ -117,7 +117,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
             @Override
             public void run() {
                 SensorsFragement fragment = fragmentByTag(FRAGMENT_TAG_SENSORS);
-                Log.e(TAG, "update " + fragment);
                 if (fragment != null) {
                     fragment.update();
                 }
