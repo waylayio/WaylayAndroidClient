@@ -1,7 +1,6 @@
 package waylay.client.activity;
 
 import java.util.ArrayList;
-import java.lang.reflect.Field;
 
 import waylay.client.scenario.Node;
 import android.content.Context;

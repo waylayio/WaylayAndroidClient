@@ -1,11 +1,10 @@
 package waylay.client.activity;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.support.v7.app.ActionBarActivity;
 
 import waylay.client.WaylayApplication;
 
-public class BaseActivity extends Activity implements LoadingListener{
+public class BaseActivity extends ActionBarActivity implements LoadingListener{
 
     //private ProgressDialog progress;
 
@@ -30,7 +29,7 @@ public class BaseActivity extends Activity implements LoadingListener{
 //            progress = ProgressDialog.show(this, "", "Loading. Please wait...", true);
 //        }
         loadingCount++;
-        setProgressBarIndeterminateVisibility(true);
+        setSupportProgressBarIndeterminateVisibility(true);
     }
 
     public void endLoading(){
@@ -39,7 +38,7 @@ public class BaseActivity extends Activity implements LoadingListener{
 //            if(progress != null){
 //                progress.dismiss();
 //            }
-            setProgressBarIndeterminateVisibility(false);
+            setSupportProgressBarIndeterminateVisibility(false);
         }
     }
 

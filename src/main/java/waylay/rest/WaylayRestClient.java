@@ -1,6 +1,7 @@
 package waylay.rest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,16 +10,19 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.android.AndroidLog;
+import retrofit.client.Client;
+import retrofit.client.OkClient;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import waylay.client.data.BayesServer;
 import waylay.client.scenario.RawData;
 import waylay.client.scenario.Task;
-
-import android.util.Log;
+import waylay.rest.auth.BasicAuthorizationInterceptor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Protocol;
 
 
 /**
@@ -76,6 +80,10 @@ public class WaylayRestClient {
                 .registerTypeAdapter(Task.class, new ScenarioAdapter())
                 .create();
 
+        OkHttpClient client = new OkHttpClient();
+        // disable spdy as it's currently not working (stream was reset: CANCEL)
+        client.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+        Client restClient = new OkClient(client);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(server.apiBase())
                 .setRequestInterceptor(new BasicAuthorizationInterceptor(server.getName(), server.getPassword()))
@@ -83,6 +91,7 @@ public class WaylayRestClient {
                 .setLogLevel(RestAdapter.LogLevel.FULL)
                 .setLog(new AndroidLog(TAG))
                 .setConverter(new GsonConverter(gson))
+                .setClient(restClient)
                 .build();
         return restAdapter.create(WaylayRestApi.class);
     }

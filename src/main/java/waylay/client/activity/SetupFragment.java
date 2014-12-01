@@ -135,7 +135,7 @@ public class SetupFragment extends WaylayFragment {
         });
 
         serverList = (ListView) view.findViewById(R.id.listSSO);
-        adapterSetup = new SetupAdapter(getActivity(), WaylayApplication.servers);
+        adapterSetup = new SetupAdapter(getActivity(),  getWaylayApplication(), getWaylayApplication().getServers());
         serverList.setAdapter(adapterSetup);
 
         serverList.setClickable(true);
@@ -185,7 +185,7 @@ public class SetupFragment extends WaylayFragment {
     }
 
     private void selectServer(BayesServer server) {
-        WaylayApplication.selectServer(server);
+        getWaylayApplication().selectServer(server);
         adapterSetup.notifyDataSetChanged();
         mListener.onServerChange();
     }
@@ -232,21 +232,23 @@ public class SetupFragment extends WaylayFragment {
     }
 
 
-    protected void launchSSOSetup(int position) {
-		WaylayApplication.selectServer((BayesServer)serverList.getItemAtPosition(position));
+    private void launchSSOSetup(int position) {
+		getWaylayApplication().selectServer((BayesServer) serverList.getItemAtPosition(position));
 		Intent i = new Intent(getActivity(), SetupActivity.class);
 		startActivity(i);
 	}
 
-    private ActionModeCallback mSSOActionModeCallback = new ActionModeCallback();
+    private void deleteServer(int position) {
+        getWaylayApplication().deleteServer((BayesServer) serverList.getItemAtPosition(position));
+    }
 
+    private ActionModeCallback mSSOActionModeCallback = new ActionModeCallback();
 
 
     protected void startBrowser() {
         Log.d(TAG, "startBrowser");
-        Uri marketUri = Uri.parse("http://"+WaylayApplication.getSelectedServer().constructURLForWebAP());
-        Intent marketIntent = new
-                Intent(Intent.ACTION_VIEW).setData(marketUri);
+        Uri uri = Uri.parse(getWaylayApplication().getSelectedServer().constructURLForWebAP());
+        Intent marketIntent = new Intent(Intent.ACTION_VIEW).setData(uri);
         startActivity(marketIntent);
 
     }
@@ -285,6 +287,10 @@ public class SetupFragment extends WaylayFragment {
                 return true;
             case R.id.itemEditSSO:
                 launchSSOSetup(position);
+                mode.finish();
+                return true;
+            case R.id.itemDeleteSSO:
+                deleteServer(position);
                 mode.finish();
                 return true;
             default:

@@ -1,9 +1,9 @@
 package waylay.client.activity;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 
 public class DefaultTabListener<T extends Fragment> implements ActionBar.TabListener {
     private Fragment mFragment;

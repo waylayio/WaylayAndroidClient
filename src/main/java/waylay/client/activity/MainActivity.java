@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import waylay.client.WaylayApplication;
 import waylay.client.sensor.AbstractLocalSensor;
 import waylay.client.sensor.AccelerometerSensor;
 import waylay.client.sensor.ActivitySensor;
@@ -21,7 +20,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.waylay.client.R;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -33,6 +31,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Window;
 
@@ -70,10 +69,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.main);
 
@@ -84,11 +83,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
         initLocalSensors();
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         actionBar.show();
+        // does not work any more
         actionBar.setIcon(R.drawable.ic_waylay_full);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(true);
+        //actionBar.setDisplayHomeAsUpEnabled(true);
 
         ActionBar.Tab tab = actionBar.newTab()
                 .setText("Scenarios")

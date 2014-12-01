@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.waylay.client"
-    android:versionCode="1"
-    android:versionName="0.1.0" >
+    android:installLocation="auto" >
     
     <supports-screens android:resizeable="true"
                   android:anyDensity="true" />
@@ -29,7 +28,9 @@
         android:name="waylay.client.WaylayApplication"
         android:icon="@drawable/ic_waylay"
         android:label="@string/app_name"
-        android:allowBackup="true">
+        android:allowBackup="true"
+        android:theme="@style/AppBaseTheme">
+
         <activity
             android:name="waylay.client.activity.MainActivity"
             android:label="@string/app_name" >

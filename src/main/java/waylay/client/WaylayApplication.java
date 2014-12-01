@@ -1,10 +1,14 @@
 package waylay.client;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.crittercism.app.Crittercism;
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,19 +24,23 @@ import waylay.client.data.BayesServer;
 import waylay.client.sensor.AbstractLocalSensor;
 import waylay.rest.PostResponseCallback;
 import waylay.rest.WaylayRestClient;
-import waylay.rest.xively.XivelyRestClient;
 import waylay.utils.ResourceId;
 
 public class WaylayApplication extends Application{
 
     private static final String TAG = "WaylayApplication";
 
+    private static final String PREF_APP = "servers";
+    private static final String PREF_KEY_SERVERS = "servers";
+
     public static final TimeUnit PUSH_TIMEUNIT = TimeUnit.SECONDS;
     public static final long PUSH_PERIOD = 1;
     public static final String XIVELY_PRODUCT_ID = "eN9d24gh_pYMbrPoi1Ll";
     public static final String XIVELY_API_KEY = "???";
 
-    public static List<BayesServer> servers = new ArrayList<BayesServer>();
+    private static final Gson GSON = new Gson();
+
+    private static List<BayesServer> servers = new ArrayList<BayesServer>();
     private static BayesServer selectedBayesServer = null;
 
     private static Set<ScheduledFuture<?>> pushers = new HashSet<ScheduledFuture<?>>();
@@ -45,7 +53,7 @@ public class WaylayApplication extends Application{
         super.onCreate();
         Crittercism.initialize(getApplicationContext(), "53bfecd683fb790c3c000004");
         com.estimote.sdk.utils.L.enableDebugLogging(true);
-        initServer();
+        initServers();
 
         //final XivelyRestClient xively = new XivelyRestClient(XIVELY_API_KEY);
         //xively.makeSureDeviceExists(XIVELY_PRODUCT_ID, ResourceId.get(this), null);
@@ -76,24 +84,59 @@ public class WaylayApplication extends Application{
         ResourceId.set(this, resourceId);
     }
 
-    public static BayesServer getSelectedServer() {
+    public List<BayesServer> getServers() {
+        return servers;
+    }
+
+    public BayesServer getSelectedServer() {
         return selectedBayesServer;
     }
 
-    public static void selectServer(BayesServer bayesServer){
+    public void selectServer(BayesServer bayesServer){
         if(!servers.contains(bayesServer)){
             servers.add(bayesServer);
+            storeServers(servers);
         }
         selectedBayesServer = bayesServer;
     }
 
-    private void initServer() {
+    public void deleteServer(BayesServer bayesServer){
+        servers.remove(bayesServer);
+        storeServers(servers);
+        selectedBayesServer = servers.get(0);
+    }
+
+    private void initServers() {
+        servers = loadStoredServers();
         if(servers.size() == 0) {
-            servers.add(new BayesServer("app.waylay.io", "admin", "admin"));
-            servers.add(new BayesServer("demo.waylay.io", "admin", "admin"));
-            servers.add(new BayesServer("10.10.131.177:8888/rest/bn", "admin", "admin"));
+            servers.add(new BayesServer("app.waylay.io", "admin", "admin", true));
+            servers.add(new BayesServer("demo.waylay.io", "admin", "admin", true));
+            servers.add(new BayesServer("10.10.131.177:8888/rest/bn", "admin", "admin", false));
         }
         selectedBayesServer = servers.get(0);
+    }
+
+    private List<BayesServer> loadStoredServers(){
+        SharedPreferences sharedPrefs = getSharedPreferences(PREF_APP, Context.MODE_PRIVATE);
+        String serversJson = sharedPrefs.getString(PREF_KEY_SERVERS, "[]");
+        try {
+            servers = GSON.fromJson(serversJson, new TypeToken<List<BayesServer>>() {}.getType());
+        }catch(JsonParseException ex){
+            Log.w(TAG, ex.getMessage());
+        }
+        return servers;
+    }
+
+    private void storeServers(List<BayesServer> servers){
+        SharedPreferences sharedPrefs = getSharedPreferences(PREF_APP, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        try {
+            String serversJson = GSON.toJson(servers);
+            editor.putString(PREF_KEY_SERVERS, serversJson);
+        }catch(JsonParseException ex){
+            Log.w(TAG, ex.getMessage());
+        }
+        editor.apply();
     }
 
     private static class Pusher implements Runnable{

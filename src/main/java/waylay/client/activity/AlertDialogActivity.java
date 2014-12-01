@@ -1,11 +1,8 @@
 package waylay.client.activity;
 
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,14 +12,6 @@ import com.waylay.client.R;
 public class AlertDialogActivity extends BaseActivity {
 
     public static final String EXTRA_MESSAGE = "message";
-
-    // TODO why this showing another activity?
-    @Deprecated
-    public static void showOld(Context context, String message){
-        Intent i = new Intent(context, AlertDialogActivity.class)
-                .putExtra(EXTRA_MESSAGE, message);
-        context.startActivity(i);
-    }
 
     public static void show(Context context, String message){
         new AlertDialog.Builder(context)

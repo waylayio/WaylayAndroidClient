@@ -1,18 +1,18 @@
 package waylay.client.data;
 
 public class BayesServer {
-	private String host;
-	private String name;
-	private String password;
+	private final String host;
+	private final String name;
+	private final String password;
+    private final boolean secure;
 	
-	public BayesServer(String host, String name, String password) {
+	public BayesServer(String host, String name, String password, boolean secure) {
 		super();
 		this.host = host;
 		this.name = name;
 		this.password = password;
+        this.secure = secure;
 	}
-	
-
 
 
 	public String getName() {
@@ -27,23 +27,35 @@ public class BayesServer {
 		return password;
 	}
 
-	@Override
+    public boolean isSecure() {
+        return secure;
+    }
+
+    @Override
 	public String toString() {
 		return getHost();
 	}
 
     public String constructURLForWebAP(){
-        return "http://" + host;
+        return getScheme() + "://" + host;
     }
 
     public String apiBase() {
+        String url = constructURLForWebAP();
         // if we have specific path we see it as the api root
-        if(host.contains("/")){
-            return  "http://" + getHost();
+        if(!host.contains("/")){
+            url += "/api";
         }
-        return  "http://" + getHost() + "/api";
+        return url;
     }
 
+    private String getScheme(){
+        if(secure){
+            return "https";
+        }else{
+            return "http";
+        }
+    }
 
     @Override
     public int hashCode() {

@@ -1,13 +1,13 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <TableLayout android:layout_width="match_parent"
-                 android:layout_height="wrap_content">
-                 
-         <TableRow>
+        android:layout_height="wrap_content">
+
+        <TableRow>
             <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="SSO address"/>
+                android:layout_height="wrap_content"
+                android:text="host"/>
         </TableRow>
         <TableRow>
             <EditText
@@ -16,11 +16,11 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"/>
         </TableRow>
-    
+
         <TableRow>
             <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="name"/>
+                android:layout_height="wrap_content"
+                android:text="name"/>
         </TableRow>
         <TableRow>
             <EditText
@@ -30,6 +30,7 @@
                 android:layout_weight="1"/>
 
         </TableRow>
+
         <TableRow>
             <TextView
                 android:layout_width="wrap_content"
@@ -37,22 +38,37 @@
                 android:text="password" />
 
         </TableRow>
-        
         <TableRow>
-        <EditText android:id="@+id/setupSSOPasswordEditText"
-                      android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:inputType="textPassword" 
-                      android:layout_weight="1"/>
+            <EditText android:id="@+id/setupSSOPasswordEditText"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:inputType="textPassword"
+                android:layout_weight="1"/>
         </TableRow>
-        
-          <TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="secure" />
+
+        </TableRow>
+        <TableRow>
+            <CheckBox android:id="@+id/setupSSOSecure"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"/>
+        </TableRow>
+
+        <TableRow>
             <Button android:layout_height="wrap_content"
-                    android:id="@+id/buttonSaveSSOSetup"
-                    android:layout_width="match_parent"
-                    android:text="save"
-                    android:layout_weight="1"/>
+                android:id="@+id/buttonSaveSSOSetup"
+                android:layout_width="match_parent"
+                android:text="save"
+                android:layout_weight="1"/>
         </TableRow>
-        
+
+
+
     </TableLayout>
 </ScrollView>

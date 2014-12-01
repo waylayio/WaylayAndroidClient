@@ -26,7 +26,7 @@ import waylay.rest.DeleteResponseCallback;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.PostResponseCallback;
 
-public class ScenariosFragment extends BaseFragment {
+public class ScenariosFragment extends WaylayFragment {
 
     private static final String TAG = "ScenariosFragment";
 
@@ -274,7 +274,7 @@ public class ScenariosFragment extends BaseFragment {
     }
 
     public void refreshAllScenarios(){
-        if(WaylayApplication.getSelectedServer() != null) {
+        if(getWaylayApplication().getSelectedServer() != null) {
             Log.d(TAG, "refreshAllScenarios");
             Tasks.clear();
             notifyTasksChanged();
