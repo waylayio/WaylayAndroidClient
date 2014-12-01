@@ -11,7 +11,7 @@ public class Tasks {
 	private static final ArrayList<Task> TASK_LIST = new ArrayList<Task>();
 
 	@SuppressWarnings("unchecked")
-	public static ArrayList<Task> getsScenarios() {
+	public static ArrayList<Task> getTasks() {
 		return TASK_LIST;
 	}
 	
@@ -39,5 +39,14 @@ public class Tasks {
 	public static void removeScenario(Task task){
 		TASK_LIST.remove(task);
 	}
+
+    public static Task getTaskById(long taskId){
+        for(Task task : TASK_LIST){
+            if(task.getId() == taskId){
+                return task;
+            }
+        }
+        return null;
+    }
 
 }

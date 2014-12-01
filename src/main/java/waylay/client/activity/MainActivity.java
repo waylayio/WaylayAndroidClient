@@ -93,8 +93,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
         ActionBar.Tab tab = actionBar.newTab()
                 .setText("Scenarios")
-                .setTabListener(new DefaultTabListener<ScenariosFragment>(
-                        this, FRAGMENT_TAG_SCENARIOS, ScenariosFragment.class));
+                .setTabListener(new DefaultTabListener<TasksFragment>(
+                        this, FRAGMENT_TAG_SCENARIOS, TasksFragment.class));
         actionBar.addTab(tab);
 
         tab = actionBar.newTab()
@@ -173,7 +173,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     @Override
     public void onServerChange() {
-        ScenariosFragment fragment = fragmentByTag(FRAGMENT_TAG_SCENARIOS);
+        TasksFragment fragment = fragmentByTag(FRAGMENT_TAG_SCENARIOS);
         if(fragment != null) {
             fragment.refreshAllScenarios();
         }

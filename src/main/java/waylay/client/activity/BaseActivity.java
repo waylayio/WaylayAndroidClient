@@ -29,7 +29,11 @@ public class BaseActivity extends ActionBarActivity implements LoadingListener{
 //            progress = ProgressDialog.show(this, "", "Loading. Please wait...", true);
 //        }
         loadingCount++;
-        setSupportProgressBarIndeterminateVisibility(true);
+        try {
+            setSupportProgressBarIndeterminateVisibility(true);
+        }catch(NullPointerException ex){
+            // this happens on lollipop
+        }
     }
 
     public void endLoading(){
@@ -38,7 +42,11 @@ public class BaseActivity extends ActionBarActivity implements LoadingListener{
 //            if(progress != null){
 //                progress.dismiss();
 //            }
-            setSupportProgressBarIndeterminateVisibility(false);
+            try{
+                setSupportProgressBarIndeterminateVisibility(false);
+            }catch(NullPointerException ex){
+                // this happens on lollipop
+            }
         }
     }
 

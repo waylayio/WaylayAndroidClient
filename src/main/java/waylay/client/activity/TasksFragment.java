@@ -1,6 +1,7 @@
 package waylay.client.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +27,7 @@ import waylay.rest.DeleteResponseCallback;
 import waylay.rest.GetResponseCallback;
 import waylay.rest.PostResponseCallback;
 
-public class ScenariosFragment extends WaylayFragment {
+public class TasksFragment extends WaylayFragment {
 
     private static final String TAG = "ScenariosFragment";
 
@@ -34,7 +35,8 @@ public class ScenariosFragment extends WaylayFragment {
     public static final String ACTION_START = "start";
     public static final String ACTION_STOP = "stop";
 
-    protected static Task selectedTask = null;
+    private Task selectedTask;
+
     private ListView mScenarioList;
     private Button mSyncButton;
     protected Object mMachineActionMode;
@@ -51,15 +53,15 @@ public class ScenariosFragment extends WaylayFragment {
      * @return A new instance of fragment ScenariosFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ScenariosFragment newInstance() {
-        ScenariosFragment fragment = new ScenariosFragment();
+    public static TasksFragment newInstance() {
+        TasksFragment fragment = new TasksFragment();
 //        Bundle args = new Bundle();
 //        args.putString(ARG_PARAM1, param1);
 //        args.putString(ARG_PARAM2, param2);
 //        fragment.setArguments(args);
         return fragment;
     }
-    public ScenariosFragment() {
+    public TasksFragment() {
         // Required empty public constructor
     }
 
@@ -78,13 +80,13 @@ public class ScenariosFragment extends WaylayFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_scenarios, container, false);
 
-        adapterScenarios = new ScenarioAdapter(getActivity(), Tasks.getsScenarios());
+        adapterScenarios = new ScenarioAdapter(getActivity(), Tasks.getTasks());
 
         mScenarioList = (ListView) view.findViewById(R.id.listMachines);
         mScenarioList.setAdapter(adapterScenarios);
 
         mScenarioList.setClickable(true);
-        mScenarioList.setOnItemClickListener(new MyScenarioViewUserListener(getActivity(), ScenarioActivity.class));
+        mScenarioList.setOnItemClickListener(new MyScenarioViewUserListener(getActivity()));
 
         mScenarioList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             // Called when the user long-clicks on someView
@@ -131,20 +133,14 @@ public class ScenariosFragment extends WaylayFragment {
 
     private class MyScenarioViewUserListener implements AdapterView.OnItemClickListener {
 
-        private Activity activity;
-        private Class m_class;
-
-        public MyScenarioViewUserListener(Activity activity, Class c){
-            this.activity = activity;
-            this.m_class = c;
+        private Context packageContext;
+        public MyScenarioViewUserListener(Context packageContext){
+            this.packageContext = packageContext;
         }
 
         @Override
         public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-            selectedTask = (Task) mScenarioList.getItemAtPosition(position);
-            Intent i = new Intent(activity, m_class);
-            startActivity(i);
-
+            TaskActivity.start(packageContext, ((Task)mScenarioList.getItemAtPosition(position)).getId());
         }
     }
 
@@ -156,7 +152,6 @@ public class ScenariosFragment extends WaylayFragment {
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.menu_scenario, menu);
-
             return true;
         }
 
@@ -170,65 +165,28 @@ public class ScenariosFragment extends WaylayFragment {
         // Called when the user selects a contextual menu item
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.itemDeleteScenario:
-                    mode.finish();
-                    actioScenarioItem(ACTION_DELETE);
-                    return true;
-                case R.id.itemStartScenario:
-                    mode.finish();
-                    actioScenarioItem(ACTION_START);
-                    return true;
-                case R.id.itemStopScenario:
-                    mode.finish();
-                    actioScenarioItem(ACTION_STOP);
-                    return true;
-                default:
-                    return false;
+            if(selectedTask != null) {
+                final Long taskId = selectedTask.getId();
+                switch (item.getItemId()) {
+                    case R.id.itemDeleteScenario:
+                        mode.finish();
+                        executeDelete(taskId);
+                        return true;
+                    case R.id.itemStartScenario:
+                        mode.finish();
+                        executeAction(ACTION_START, taskId);
+                        return true;
+                    case R.id.itemStopScenario:
+                        mode.finish();
+                        executeAction(ACTION_STOP, taskId);
+                        return true;
+                    default:
+                        return false;
+                }
+            }else{
+                Toast.makeText(getActivity(), "Something went wrong, no task selected", Toast.LENGTH_SHORT).show();
+                return false;
             }
-        }
-
-        private void actioScenarioItem(final String action) {
-            final Long id = selectedTask.getId();
-            if(ACTION_STOP.equals(action) || ACTION_START.equals(action)){
-                WaylayApplication.getRestService().postScenarioAction(id, action, new PostResponseCallback<Void>(){
-                    @Override
-                    public void onPostSuccess(Void t) {
-                        Log.i(TAG, "action was success");
-                        getScenario(id);
-                    }
-
-                    @Override
-                    public void onPostFailure(Throwable t) {
-                        Log.e(TAG, "action failed", t);
-                        Activity activity = getActivity();
-                        if(activity != null) {
-                            Toast.makeText(activity, "Failed to perform action: " + action, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            } else if(ACTION_DELETE.equals(action)){
-                WaylayApplication.getRestService().deleteScenarioAction(id, new DeleteResponseCallback() {
-                    @Override
-                    public void onDeleteSuccess() {
-                        Log.i(TAG, "action was success");
-                        Tasks.removeScenario(selectedTask);
-                        notifyTasksChanged();
-                        selectedTask = null;
-                    }
-
-                    @Override
-                    public void onDeleteFailure(Throwable t) {
-                        Log.e(TAG, t.getMessage(), t);
-                        Activity activity = getActivity();
-                        if(activity != null) {
-                            Toast.makeText(activity, "Failed to delete scenario", Toast.LENGTH_SHORT).show();
-                        }
-                        notifyTasksChanged();
-                    }
-                });
-            }
-
         }
 
         // Called when the user exits the action mode
@@ -238,11 +196,51 @@ public class ScenariosFragment extends WaylayFragment {
         }
     };
 
-    public void getScenario(long scenarioId){
+    private void executeAction(final String action, final long taskId) {
+        WaylayApplication.getRestService().postScenarioAction(taskId, action, new PostResponseCallback<Void>() {
+            @Override
+            public void onPostSuccess(Void t) {
+                Log.i(TAG, "action was success");
+                etTask(taskId);
+            }
+
+            @Override
+            public void onPostFailure(Throwable t) {
+                Log.e(TAG, "action failed", t);
+                Activity activity = getActivity();
+                if (activity != null) {
+                    Toast.makeText(activity, "Failed to perform action: " + action, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void executeDelete(Long taskId) {
+        WaylayApplication.getRestService().deleteScenarioAction(taskId, new DeleteResponseCallback() {
+            @Override
+            public void onDeleteSuccess() {
+                Log.i(TAG, "action was success");
+                Tasks.removeScenario(selectedTask);
+                notifyTasksChanged();
+                selectedTask = null;
+            }
+
+            @Override
+            public void onDeleteFailure(Throwable t) {
+                Log.e(TAG, t.getMessage(), t);
+                Activity activity = getActivity();
+                if (activity != null) {
+                    Toast.makeText(activity, "Failed to delete scenario", Toast.LENGTH_SHORT).show();
+                }
+                notifyTasksChanged();
+            }
+        });
+    }
+
+
+    private void etTask(long scenarioId){
         Log.d(TAG, "getTask");
-
         mListener.startLoading();
-
         WaylayApplication.getRestService().getScenario(scenarioId, new GetResponseCallback<Task>() {
             @Override
             public void onDataReceived(Task task) {
@@ -259,7 +257,6 @@ public class ScenariosFragment extends WaylayFragment {
                 alert(t.getMessage());
             }
         });
-
     }
 
     private void endLoading() {

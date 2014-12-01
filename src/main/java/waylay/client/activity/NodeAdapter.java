@@ -2,6 +2,7 @@ package waylay.client.activity;
 
 import java.util.ArrayList;
 
+import retrofit.http.POST;
 import waylay.client.scenario.Node;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -17,11 +18,13 @@ public class NodeAdapter extends ArrayAdapter<Node> {
 	
 	private final Context context;
 	private final ArrayList<Node> values;
+    private final String targetNode;
 
-	public NodeAdapter(Context context, ArrayList<Node> values) {
+	public NodeAdapter(Context context, ArrayList<Node> values, String tagetNode) {
 		super(context, R.layout.rowlayout, values);
 		this.context = context;
 		this.values = values;
+        this.targetNode = tagetNode;
 	}
 
 	@Override
@@ -40,10 +43,13 @@ public class NodeAdapter extends ArrayAdapter<Node> {
 		textTitle.setText(name);
 		textStatus.setText(node.getStatesAsString());
 		textID.setText(node.getMostLikelyState());
-		if (node.getName().equals(ScenariosFragment.selectedTask.getTargetNode())) {
+		if (node.getName().equals(targetNode)) {
 			imageView.setImageResource(R.drawable.trigger);
 		} else {
-            int resourceID = context.getResources().getIdentifier("node.getSensorName().toLowerCase()", "drawable", context.getPackageName());
+            int resourceID = 0;
+            if(node.getSensorName() != null){
+                resourceID = context.getResources().getIdentifier(node.getSensorName().toLowerCase(), "drawable", context.getPackageName());
+            }
 			if(resourceID == 0){
                 resourceID = R.drawable.sensor;
             }

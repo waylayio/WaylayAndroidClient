@@ -41,7 +41,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="waylay.client.activity.ScenarioActivity" />
+        <activity android:name="waylay.client.activity.TaskActivity" />
         <activity android:name="waylay.client.activity.SetupActivity" />
         <activity android:name="waylay.client.activity.AlertDialogActivity" />
 

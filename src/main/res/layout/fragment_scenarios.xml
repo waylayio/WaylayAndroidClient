@@ -1,27 +1,21 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Machines"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="waylay.client.activity.ScenariosFragment">
+    android:layout_height="match_parent" >
 
-    <!-- TODO: Update blank fragment layout -->
-    <LinearLayout android:id="@+id/Machines"
-        android:orientation="vertical"
+    <ListView android:id="@+id/listMachines"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <ListView android:id="@+id/listMachines"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" />
 
 
-        <Button android:id="@+id/buttonSyncWithServer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Synchronize"/>
+    <Button android:id="@+id/buttonSyncWithServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Synchronize"/>
 
-    </LinearLayout>
+</LinearLayout>
 
-</FrameLayout>
