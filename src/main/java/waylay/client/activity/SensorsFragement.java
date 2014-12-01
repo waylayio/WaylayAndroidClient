@@ -134,6 +134,7 @@ public class SensorsFragement extends WaylayFragment {
 
     public void update(){
         // had this case before
+        Log.e(TAG, "update " + adapterLocalSensors);
         if(adapterLocalSensors != null) {
             adapterLocalSensors.notifyDataSetChanged();
         }

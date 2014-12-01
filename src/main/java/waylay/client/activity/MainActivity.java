@@ -22,7 +22,6 @@ import com.waylay.client.R;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
@@ -31,6 +30,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Window;
@@ -39,7 +39,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         SensorsFragement.OnFragmentInteractionListener,
         SetupFragment.OnFragmentInteractionListener{
 
-	public static final String TAG = "Main Manager";
+	public static final String TAG = "MainActivity";
 
     private static final String FRAGMENT_TAG_SCENARIOS = "scenarios";
     private static final String FRAGMENT_TAG_SENSORS = "sensors";
@@ -117,6 +117,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
             @Override
             public void run() {
                 SensorsFragement fragment = fragmentByTag(FRAGMENT_TAG_SENSORS);
+                Log.e(TAG, "update " + fragment);
                 if (fragment != null) {
                     fragment.update();
                 }
@@ -250,7 +251,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
                 errorFragment.setDialog(errorDialog);
                 // Show the error dialog in the DialogFragment
                 errorFragment.show(
-                        getFragmentManager(),
+                        getSupportFragmentManager(),
                         "Activity Recognition");
             }
             return false;

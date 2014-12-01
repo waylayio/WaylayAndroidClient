@@ -21,7 +21,7 @@ public class BaseActivity extends ActionBarActivity implements LoadingListener{
 
     @SuppressWarnings("unchecked")
     protected <T> T fragmentByTag(String tag){
-        return (T) getFragmentManager().findFragmentByTag(tag);
+        return (T) getSupportFragmentManager().findFragmentByTag(tag);
     }
 
     public void startLoading(){
