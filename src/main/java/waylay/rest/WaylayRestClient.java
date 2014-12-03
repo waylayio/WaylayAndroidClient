@@ -81,8 +81,9 @@ public class WaylayRestClient {
                 .create();
 
         OkHttpClient client = new OkHttpClient();
-        // disable spdy as it's currently not working (stream was reset: CANCEL)
-        client.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+        // If you have connection problems like "stream was reset: CANCEL" you can try
+        // to disable SPDY for debugging:
+        // client.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
         Client restClient = new OkClient(client);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(server.apiBase())
