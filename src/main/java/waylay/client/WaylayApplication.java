@@ -109,8 +109,8 @@ public class WaylayApplication extends Application{
     private void initServers() {
         servers = loadStoredServers();
         if(servers.size() == 0) {
-            servers.add(new BayesServer("app.waylay.io", "admin", "admin", true));
-            servers.add(new BayesServer("demo.waylay.io", "admin", "admin", true));
+            servers.add(new BayesServer("app.waylay.io", "20UKKE2C7JLOYTV55UKIE9P50", "l9yso7nNi011fJ52Q9Jh8MokDXjOdlScxtjXHMWMJ00", true));
+            servers.add(new BayesServer("demo.waylay.io", "20UKKE2C7JLOYTV55UKIE9P50", "l9yso7nNi011fJ52Q9Jh8MokDXjOdlScxtjXHMWMJ00", true));
             servers.add(new BayesServer("10.10.131.177:8888/rest/bn", "admin", "admin", false));
         }
         selectedBayesServer = servers.get(0);
@@ -157,6 +157,7 @@ public class WaylayApplication extends Application{
         public void run() {
             try {
                 final Map<String, Object> data = sensor.getData();
+                data.put("domain", selectedBayesServer.getHost());
                 Log.i(TAG, "--> pushing data from " + sensor.getName() + ", sending " + data);
                 service.postResourceValue(resource, data, new PostResponseCallback<Void>() {
                     @Override

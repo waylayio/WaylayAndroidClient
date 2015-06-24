@@ -1,8 +1,5 @@
 package waylay.rest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,14 +12,12 @@ import retrofit.client.OkClient;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import waylay.client.data.BayesServer;
-import waylay.client.scenario.RawData;
 import waylay.client.scenario.Task;
 import waylay.rest.auth.BasicAuthorizationInterceptor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Protocol;
 
 
 /**
@@ -33,10 +28,12 @@ public class WaylayRestClient {
 
 	private final BayesServer server;
     private final WaylayRestApi service;
+    private final WaylayRestApi dataService;
 
     public WaylayRestClient(final BayesServer server) {
         this.server = server;
         this.service = createRestClient(server);
+        this.dataService = createBridgeRestClient(server);
     }
 
     public void postScenarioAction(Long scenarioId, String action, final PostResponseCallback<Void> callback){
@@ -44,18 +41,7 @@ public class WaylayRestClient {
 	}
 
     public void postResourceValue(String resource, Map<String, Object> sensorData, final PostResponseCallback<Void> callback){
-        RawData rawData = new RawData(resource);
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for(Map.Entry<String, Object> entry:sensorData.entrySet()) {
-            Map<String, Object> data = new HashMap<String, Object>();
-            data.put("collectedTime", System.currentTimeMillis());
-            data.put("validPeriodSecs", 60);
-            data.put("parameterName", entry.getKey());
-            data.put("value", entry.getValue());
-            list.add(data);
-        }
-        rawData.setData(list);
-        service.postRawData(rawData, new RetrofitPostResponseCallback<Void>(callback));
+        dataService.postRawData(resource, sensorData, new RetrofitPostResponseCallback<Void>(callback));
     }
 	
 	public void deleteScenarioAction(final long scenarioId, final DeleteResponseCallback callback){
@@ -87,6 +73,29 @@ public class WaylayRestClient {
         Client restClient = new OkClient(client);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(server.apiBase())
+                .setRequestInterceptor(new BasicAuthorizationInterceptor(server.getName(), server.getPassword()))
+                .setProfiler(new RequestLoggingProfiler(TAG))
+                .setLogLevel(RestAdapter.LogLevel.FULL)
+                .setLog(new AndroidLog(TAG))
+                .setConverter(new GsonConverter(gson))
+                .setClient(restClient)
+                .build();
+        return restAdapter.create(WaylayRestApi.class);
+    }
+
+    private WaylayRestApi createBridgeRestClient(BayesServer server) {
+        Gson gson = new GsonBuilder()
+                //.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(Task.class, new ScenarioAdapter())
+                .create();
+
+        OkHttpClient client = new OkHttpClient();
+        // If you have connection problems like "stream was reset: CANCEL" you can try
+        // to disable SPDY for debugging:
+        // client.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+        Client restClient = new OkClient(client);
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://data.waylay.io")
                 .setRequestInterceptor(new BasicAuthorizationInterceptor(server.getName(), server.getPassword()))
                 .setProfiler(new RequestLoggingProfiler(TAG))
                 .setLogLevel(RestAdapter.LogLevel.FULL)
