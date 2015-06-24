@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
 	public static final String TAG = "MainActivity";
 
-    private static final String FRAGMENT_TAG_SCENARIOS = "scenarios";
+    private static final String FRAGMENT_TAG_SCENARIOS = "tasks";
     private static final String FRAGMENT_TAG_SENSORS = "sensors";
     private static final String FRAGMENT_TAG_SETUP = "setup";
 
@@ -92,7 +92,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         //actionBar.setDisplayHomeAsUpEnabled(true);
 
         ActionBar.Tab tab = actionBar.newTab()
-                .setText("Scenarios")
+                .setText("Tasks")
                 .setTabListener(new DefaultTabListener<TasksFragment>(
                         this, FRAGMENT_TAG_SCENARIOS, TasksFragment.class));
         actionBar.addTab(tab);
