@@ -1,10 +1,11 @@
 package waylay.client.activity;
 
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 
 import waylay.client.WaylayApplication;
 
-public class BaseActivity extends ActionBarActivity implements LoadingListener{
+public class BaseActivity extends AppCompatActivity implements LoadingListener{
 
     //private ProgressDialog progress;
 

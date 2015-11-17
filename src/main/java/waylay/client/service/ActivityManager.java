@@ -9,15 +9,15 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.ActivityRecognitionClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
 
 import java.util.concurrent.TimeUnit;
 
 import waylay.client.sensor.ActivityListener;
 import waylay.client.sensor.ActivityResult;
 
-public class ActivityManager implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener{
+public class ActivityManager implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = ActivityManager.class.getSimpleName();
 
@@ -42,7 +42,7 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
     private boolean mInProgress;
 
     // Store the current activity recognition client
-    private ActivityRecognitionClient mActivityRecognitionClient;
+    private GoogleApiClient googleApiClient;
 
     private ActivityListener listener;
 
@@ -58,7 +58,11 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
          * connection failure listener, the constructor uses "this"
          * to specify the values of those parameters.
          */
-        mActivityRecognitionClient = new ActivityRecognitionClient(context, this, this);
+        googleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(ActivityRecognition.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
         /*
          * Create the PendingIntent that Location Services uses
          * to send activity recognition updates back to this app.
@@ -94,9 +98,10 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
                  * preset detection interval and PendingIntent.
                  * This call is synchronous.
                  */
-                if(mActivityRecognitionClient.isConnected()) {
+                if(googleApiClient.isConnected()) {
                     Log.i(TAG, "Starting activity updates");
-                    mActivityRecognitionClient.requestActivityUpdates(DETECTION_INTERVAL_MILLISECONDS, mActivityRecognitionPendingIntent);
+                    ActivityRecognition.ActivityRecognitionApi
+                            .requestActivityUpdates(googleApiClient, DETECTION_INTERVAL_MILLISECONDS, mActivityRecognitionPendingIntent);
                 }
                 break;
                 /*
@@ -104,9 +109,10 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
                  * but it doesn't match a known case. Throw an exception.
                  */
             case STOP:
-                if(mActivityRecognitionClient.isConnected()) {
+                if(googleApiClient.isConnected()) {
                     Log.i(TAG, "Stopping activity updates");
-                    mActivityRecognitionClient.removeActivityUpdates(mActivityRecognitionPendingIntent);
+                    ActivityRecognition.ActivityRecognitionApi
+                            .removeActivityUpdates(googleApiClient, mActivityRecognitionPendingIntent);
                 }
                 break;
             default :
@@ -117,7 +123,7 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
 //         * detection interval and PendingIntent. This call is
 //         * synchronous.
 //         */
-//        mActivityRecognitionClient.requestActivityUpdates(
+//        googleApiClient.requestActivityUpdates(
 //                DETECTION_INTERVAL_MILLISECONDS,
 //                mActivityRecognitionPendingIntent);
         /*
@@ -125,19 +131,17 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
          * in progress flag and disconnect the client
          */
         mInProgress = false;
-        mActivityRecognitionClient.disconnect();
+        googleApiClient.disconnect();
     }
 
-    /*
-         * Called by Location Services once the activity recognition
-         * client is disconnected.
-         */
     @Override
-    public void onDisconnected() {
+    public void onConnectionSuspended(int i) {
         // Turn off the request flag
         mInProgress = false;
-        // Delete the client
-        mActivityRecognitionClient = null;
+        // The connection to Google Play services was lost for some reason. We call connect() to
+        // attempt to re-establish the connection.
+        Log.i(TAG, "Connection suspended");
+        googleApiClient.connect();
     }
 
     // Implementation of OnConnectionFailedListener.onConnectionFailed
@@ -203,7 +207,7 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
             // Indicate that a request is in progress
             mInProgress = true;
             // Request a connection to Location Services
-            mActivityRecognitionClient.connect();
+            googleApiClient.connect();
             //
         } else {
             /*
@@ -237,7 +241,7 @@ public class ActivityManager implements GooglePlayServicesClient.ConnectionCallb
             // Indicate that a request is in progress
             mInProgress = true;
             // Request a connection to Location Services
-            mActivityRecognitionClient.connect();
+            googleApiClient.connect();
             //
         } else {
             /*

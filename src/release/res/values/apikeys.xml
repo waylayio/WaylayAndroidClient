@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="waylay_api_key" translatable="false" templateMergeStrategy="preserve">
+        xxx
+    </string>
+    <string name="waylay_api_secret" translatable="false" templateMergeStrategy="preserve">
+        xxx
+    </string>
+
+</resources>

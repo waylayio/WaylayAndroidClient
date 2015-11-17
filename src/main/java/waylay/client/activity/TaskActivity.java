@@ -12,7 +12,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.ListView;
 
-import com.waylay.client.R;
+import waylay.client.R;
 
 public class TaskActivity extends Activity {
 

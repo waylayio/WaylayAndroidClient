@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import waylay.client.scenario.Task;
 import waylay.client.scenario.ScenarioStatus;
 
-import com.waylay.client.R;
+import waylay.client.R;
 
 import android.content.Context;
 import android.view.LayoutInflater;

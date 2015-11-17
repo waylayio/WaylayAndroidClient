@@ -1,17 +1,24 @@
 package waylay.client.sensor;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LocationSensor extends AbstractLocalSensor implements LocationListener{
+import waylay.client.WaylayApplication;
+import static android.support.v4.content.ContextCompat.*;
+
+public class LocationSensor extends AbstractLocalSensor implements LocationListener {
 
     private static final String TAG = "LocationSensor";
 
@@ -22,20 +29,23 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
 
     private String provider = LocationManager.NETWORK_PROVIDER;
 
-	private Location location;
+    private Location location;
 
     private SensorListener listener;
 
     private LocationManager locationManager;
-	
-	public LocationSensor(){
-		
-	}
 
-    public void start(LocationManager locationManager, final SensorListener listener) {
+    private Context context;
+
+    public LocationSensor() {
+
+    }
+
+    public void start(Context context, LocationManager locationManager, final SensorListener listener) {
         Log.i(TAG, "Starting " + this + " with " + locationManager);
         this.listener = listener;
         this.locationManager = locationManager;
+        this.context = context;
         init();
     }
 
@@ -53,7 +63,24 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         if (!isGPSEnabled && !isNetworkEnabled) {
             // no network provider is enabled
+
         } else {
+            if (checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+
+                //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for Activity#requestPermissions for more details.
+                Log.i(TAG, "Could not start location updates as we don' have the needed permisission");
+
+                // TODO we need to keep repeating this until the permission is granted
+
+                return;
+            }
             // First get location from Network Provider
             if (isNetworkEnabled) {
                 locationManager.requestLocationUpdates(
@@ -90,6 +117,17 @@ public class LocationSensor extends AbstractLocalSensor implements LocationListe
 
     public void stop(LocationManager locationManager){
         Log.i(TAG, "Stopping " + this + " with " + locationManager);
+        if (checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
+        }
         locationManager.removeUpdates(this);
         location = null;
     }

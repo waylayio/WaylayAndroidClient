@@ -5,7 +5,7 @@ import java.util.List;
 import waylay.client.WaylayApplication;
 import waylay.client.data.BayesServer;
 
-import com.waylay.client.R;
+import waylay.client.R;
 
 import android.content.Context;
 import android.view.LayoutInflater;

@@ -18,19 +18,23 @@ import waylay.client.service.ActivityManager;
 import com.estimote.sdk.BeaconManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.waylay.client.R;
+import waylay.client.R;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Window;
@@ -108,6 +112,18 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
                 .setTabListener(new DefaultTabListener<SetupFragment>(
                         this, FRAGMENT_TAG_SETUP, SetupFragment.class));
         actionBar.addTab(tab);
+
+
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // No explanation needed, we can request the permission.
+            int MY_PERMISSIONS_ACCESS_LOCATION = 1;
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_ACCESS_LOCATION);
+            // MY_PERMISSIONS_ACCESS_LOCATION is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+        }
 	}
 
 
@@ -289,7 +305,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
         SensorListener buffered = new BufferingSensorListener(this, 1, TimeUnit.SECONDS);
 
-        locationSensor.start(locationManager, buffered);
+        locationSensor.start(getApplication(), locationManager, buffered);
         beaconSensor.start(beaconManager, buffered);
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);

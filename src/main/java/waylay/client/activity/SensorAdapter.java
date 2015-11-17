@@ -12,7 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.waylay.client.R;
+import waylay.client.R;
 
 public class SensorAdapter extends ArrayAdapter<AbstractLocalSensor> {
 	

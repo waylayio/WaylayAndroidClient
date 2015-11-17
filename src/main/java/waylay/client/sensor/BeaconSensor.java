@@ -1,20 +1,16 @@
 package waylay.client.sensor;
 
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.estimote.sdk.Beacon;
 import com.estimote.sdk.BeaconManager;
 import com.estimote.sdk.Region;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class BeaconSensor extends AbstractLocalSensor {
 
@@ -37,7 +33,8 @@ public class BeaconSensor extends AbstractLocalSensor {
     public void start(final BeaconManager beaconManager, final SensorListener listener){
         this.listener = listener;
 
-        if(beaconManager.hasBluetooth()) {
+
+        //if(beaconManager.hasBluetooth()) {
             Log.i(TAG, "Starting " + this + " with " + beaconManager);
             beaconManager.setRangingListener(new BeaconManager.RangingListener() {
                 @Override
@@ -49,18 +46,13 @@ public class BeaconSensor extends AbstractLocalSensor {
             beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
                 @Override
                 public void onServiceReady() {
-                    try {
-                        beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
-                        active = true;
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Cannot start ranging", e);
-                        active = false;
-                    }
+                    beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
+                    active = true;
                 }
             });
-        }else{
-            Log.e(TAG, "Can't start ranging as the device does not support bluetooth le");
-        }
+//        }else{
+//            Log.e(TAG, "Can't start ranging as the device does not support bluetooth le");
+//        }
     }
 
     public void stop(final BeaconManager beaconManager){
@@ -94,7 +86,7 @@ public class BeaconSensor extends AbstractLocalSensor {
         Map<String,Object> data = new HashMap<String,Object>();
         for(Beacon beacon : beacons){
             data.put("proximityUUID", beacon.getProximityUUID());
-            data.put("name", beacon.getName());
+            //data.put("name", beacon.getName());
             data.put("macAddress", beacon.getMacAddress());
             data.put("major", beacon.getMajor());
             data.put("minor", beacon.getMinor());

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.waylay.client"
+    package="waylay.client"
     android:installLocation="auto" >
     
     <supports-screens android:resizeable="true"
@@ -25,14 +25,14 @@
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION"/>
    
     <application
-        android:name="waylay.client.WaylayApplication"
+        android:name=".WaylayApplication"
         android:icon="@drawable/ic_waylay"
         android:label="@string/app_name"
         android:allowBackup="true"
         android:theme="@style/AppBaseTheme">
 
         <activity
-            android:name="waylay.client.activity.MainActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,14 +41,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="waylay.client.activity.TaskActivity" />
-        <activity android:name="waylay.client.activity.SetupActivity" />
-        <activity android:name="waylay.client.activity.AlertDialogActivity" />
-
-        <service android:name="com.estimote.sdk.service.BeaconService" android:exported="false"/>
+        <activity android:name=".activity.TaskActivity" />
+        <activity android:name=".activity.SetupActivity" />
+        <activity android:name=".activity.AlertDialogActivity" />
 
         <service
-            android:name="waylay.client.service.ActivityRecognitionIntentService"
+            android:name=".service.ActivityRecognitionIntentService"
             android:label="@string/app_name"
             android:exported="false">
         </service>

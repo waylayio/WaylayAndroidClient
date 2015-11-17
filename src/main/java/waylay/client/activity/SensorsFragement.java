@@ -12,7 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.waylay.client.R;
+import waylay.client.R;
 
 import waylay.client.sensor.AbstractLocalSensor;
 

@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-import com.waylay.client.R;
+import waylay.client.R;
 
 public class SetupActivity extends BaseActivity{
 

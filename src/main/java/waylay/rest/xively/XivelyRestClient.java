@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
 
 import java.io.IOException;
 
@@ -49,7 +48,7 @@ public class XivelyRestClient {
 
             @Override
             public void failure(RetrofitError error) {
-                if(error.getResponse().getStatus() == HttpStatus.SC_NOT_FOUND){
+                if(error.getResponse().getStatus() == 404){
                     Devices devices = new Devices();
                     devices.devices.add(new Serial(serial));
                     restClient.createDevice(productId, devices, new Callback<Void>() {
