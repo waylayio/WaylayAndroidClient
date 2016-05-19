@@ -11,40 +11,39 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import waylay.client.data.BayesServer;
-import waylay.client.sensor.AbstractLocalSensor;
-import waylay.rest.PostResponseCallback;
+import waylay.client.data.ConnectionSettings;
+import waylay.mqtt.MqttManager;
+import waylay.mqtt.MqttServer;
+import waylay.mqtt.PahoMqttManager;
+import waylay.mqtt.PahoMqttServer;
+import waylay.client.service.push.PushService;
+import waylay.client.service.push.WaylayPushService;
 import waylay.rest.WaylayRestClient;
 import waylay.utils.ResourceId;
 
-public class WaylayApplication extends Application{
-
+public class WaylayApplication extends Application {
     private static final String TAG = "WaylayApplication";
-
     private static final String PREF_APP = "servers";
     private static final String PREF_KEY_SERVERS = "servers";
-
-    public static final TimeUnit PUSH_TIMEUNIT = TimeUnit.SECONDS;
-    public static final long PUSH_PERIOD = 1;
-
+    private static final String PREF_SETTINGS = "connectionsettings";
     private static final Gson GSON = new Gson();
-
-    private static List<BayesServer> servers = new ArrayList<BayesServer>();
+    private static final String CONNECTION_TYPE = "ConnectionType";
+    private static final String KEY = "Key";
+    private static final String VALUE = "Value";
+    private static final String AUTH = "UseAuthForMQTT";
+    public static final String SELECTEDSERVER = "SelectedServer";
+    public static final String EMPTY = "";
+    private static List<BayesServer> servers = new ArrayList<>();
     private static BayesServer selectedBayesServer = null;
 
-    private static Set<ScheduledFuture<?>> pushers = new HashSet<ScheduledFuture<?>>();
-
-
-    public static final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1);
+    private ConnectionSettings mConnectionSettings;
+    private MqttManager mqttManager;
+    private PushService pushService;
 
     @Override
     public void onCreate() {
@@ -52,24 +51,21 @@ public class WaylayApplication extends Application{
         Crittercism.initialize(getApplicationContext(), "53bfecd683fb790c3c000004");
         com.estimote.sdk.EstimoteSDK.enableDebugLogging(true);
         initServers();
+        mqttManager = new PahoMqttManager(this);
+        pushService = new WaylayPushService(this, mqttManager);
+    }
+
+    public MqttManager getMqttManager() {
+        return mqttManager;
     }
 
     public static WaylayRestClient getRestService(){
         return new WaylayRestClient(selectedBayesServer);
     }
 
-    public void startPushing(final AbstractLocalSensor localSensor) {
-        Log.i(TAG, "start pushing data for sensor " + localSensor.getName());
-        // TODO make sure we don't add a sensor twice
-        pushers.add(executorService.scheduleWithFixedDelay(new Pusher(ResourceId.get(this), localSensor), 0, PUSH_PERIOD, PUSH_TIMEUNIT));
-    }
-
-    public void stopPushing(){
-        Log.i(TAG, "stop pushing all data");
-        for(ScheduledFuture<?> pusher:pushers){
-            pusher.cancel(true);
-        }
-    }
+    public PushService getPushService() {
+       return pushService;
+   }
 
     public String getResourceId() {
         return ResourceId.get(this);
@@ -92,6 +88,10 @@ public class WaylayApplication extends Application{
             servers.add(bayesServer);
             storeServers(servers);
         }
+        SharedPreferences sharedPrefs = getSharedPreferences(SELECTEDSERVER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putInt(SELECTEDSERVER, bayesServer.hashCode());
+        editor.apply();
         selectedBayesServer = bayesServer;
     }
 
@@ -104,11 +104,20 @@ public class WaylayApplication extends Application{
     private void initServers() {
         servers = loadStoredServers();
         if(servers.size() == 0) {
-            servers.add(new BayesServer("app.waylay.io", getResources().getString(R.string.waylay_api_key), getResources().getString(R.string.waylay_api_secret), true));
-            servers.add(new BayesServer("demo.waylay.io", getResources().getString(R.string.waylay_api_key), getResources().getString(R.string.waylay_api_secret), true));
-            servers.add(new BayesServer("10.10.131.177:8888/rest/bn", "admin", "admin", false));
+            servers.add(new BayesServer("app.waylay.io", getResources().getString(R.string.waylay_api_key), getResources().getString(R.string.waylay_api_secret), getString(R.string.waylay_api_key), "devices.waylay.io", "data.waylay.io", true));
+            servers.add(new BayesServer("demo.waylay.io", getResources().getString(R.string.waylay_api_key), getResources().getString(R.string.waylay_api_secret), getString(R.string.waylay_api_key), "devices.waylay.io", "data.waylay.io", true));
+            servers.add(new BayesServer("10.10.131.177:8888/rest/bn", "admin", "admin", getString(R.string.waylay_api_key), "devices.waylay.io", "data.waylay.io", false));
         }
+        SharedPreferences sharedPrefs = getSharedPreferences(SELECTEDSERVER, Context.MODE_PRIVATE);
+        int hash = sharedPrefs.getInt(SELECTEDSERVER, 0);
         selectedBayesServer = servers.get(0);
+
+        for (BayesServer server : servers) {
+            if (hash == server.hashCode()) {
+                selectedBayesServer = server;
+                break;
+            }
+        }
     }
 
     private List<BayesServer> loadStoredServers(){
@@ -134,41 +143,33 @@ public class WaylayApplication extends Application{
         editor.apply();
     }
 
-    private static class Pusher implements Runnable{
-
-        private final String resource;
-        private final AbstractLocalSensor sensor;
-
-        // keep this around as we don' want to suddenly change servers
-        private final WaylayRestClient service;
-
-        private Pusher(final String resource, final AbstractLocalSensor sensor) {
-            this.resource = resource;
-            this.sensor = sensor;
-            this.service =  WaylayApplication.getRestService();
-        }
-
-        @Override
-        public void run() {
+    public void storeSettings() {
+        if (mConnectionSettings != null) {
+            SharedPreferences sharedPreferences = getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
             try {
-                final Map<String, Object> data = sensor.getData();
-                data.put("domain", selectedBayesServer.getHost());
-                Log.i(TAG, "--> pushing data from " + sensor.getName() + ", sending " + data);
-                service.postResourceValue(resource, data, new PostResponseCallback<Void>() {
-                    @Override
-                    public void onPostSuccess(Void t) {
-                        Log.i(TAG, "<-- pushed data from " + sensor.getName() + ", sent " + data);
-                    }
+                editor.putString(CONNECTION_TYPE, mConnectionSettings.getConnectionType());
+                editor.putString(KEY, mConnectionSettings.getKey());
+                editor.putString(VALUE, mConnectionSettings.getValue());
+                editor.putBoolean(AUTH, mConnectionSettings.isUseAuth());
 
-                    @Override
-                    public void onPostFailure(Throwable t) {
-                        Log.e(TAG, "failed to push data from " + sensor.getName() + ", sent " + data, t);
-                    }
-                });
-            }catch (Exception ex){
+                editor.apply();
+            } catch (Exception ex) {
                 Log.e(TAG, ex.getMessage(), ex);
             }
         }
+    }
+
+    public ConnectionSettings getConnectionSettings() {
+        if (mConnectionSettings == null) {
+            SharedPreferences sharedPreferences = getSharedPreferences(PREF_SETTINGS, Context.MODE_PRIVATE);
+            mConnectionSettings = new ConnectionSettings();
+            mConnectionSettings.setConnectionType(sharedPreferences.getString(CONNECTION_TYPE, ConnectionSettings.HTTP));
+            mConnectionSettings.setKey(sharedPreferences.getString(KEY, EMPTY));
+            mConnectionSettings.setValue(sharedPreferences.getString(VALUE, EMPTY));
+            mConnectionSettings.setUseAuth(sharedPreferences.getBoolean(AUTH, false));
+        }
+        return mConnectionSettings;
     }
 
 }

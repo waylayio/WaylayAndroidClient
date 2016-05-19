@@ -1,5 +1,8 @@
 package waylay.client.activity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import waylay.client.data.BayesServer;
 import android.os.Bundle;
 import android.text.util.Linkify;
@@ -17,22 +20,26 @@ public class SetupActivity extends BaseActivity{
 
     public static final int RESULT_CHANGED = 1;
 
-    private EditText mSSO_URL;
-    private EditText mSSO_Password;
-    private EditText mSSO_Name;
-    private CheckBox mSSO_Secure;
+
+    @BindView(R.id.setupSSO_URLEditNameText) EditText mSSO_URL;
+    @BindView(R.id.setupSSOEditNameText) EditText mSSO_Password;
+    @BindView(R.id.setupSSOPasswordEditText) EditText mSSO_Name;
+    @BindView(R.id.setupSSOSecure) CheckBox mSSO_Secure;
+    @BindView(R.id.setupSSOMasterkeyEditText) EditText mSSO_Masterkey;
+    @BindView(R.id.setupSSODeviceGatewayEditText) EditText mSSO_DeviceGateway;
+    @BindView(R.id.setupSSODataBrokerEditText) EditText mSSO_DataBroker;
+    @BindView(R.id.buttonSaveSSOSetup) Button mSaveSSOButton;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setup);
         Log.d(TAG, "start sso setup");
 
-        mSSO_URL = viewById(R.id.setupSSO_URLEditNameText);
+        ButterKnife.bind(this);
+
         Linkify.addLinks(mSSO_URL, Linkify.WEB_URLS);
-        mSSO_Name = viewById(R.id.setupSSOEditNameText);
-        mSSO_Password = viewById(R.id.setupSSOPasswordEditText);
-        mSSO_Secure = viewById(R.id.setupSSOSecure);
-        Button mSaveSSOButton = viewById(R.id.buttonSaveSSOSetup);
+        Linkify.addLinks(mSSO_DeviceGateway, Linkify.WEB_URLS);
+        Linkify.addLinks(mSSO_DataBroker, Linkify.WEB_URLS);
 
         BayesServer selectedServer = getWaylayApplication().getSelectedServer();
         if(selectedServer != null){
@@ -40,28 +47,38 @@ public class SetupActivity extends BaseActivity{
             mSSO_URL.setText(selectedServer.getHost());
             mSSO_Name.setText(selectedServer.getName());
             mSSO_Password.setText(selectedServer.getPassword());
+            String master = selectedServer.getMasterkey();
+            if (master != null)
+                mSSO_Masterkey.setText(selectedServer.getMasterkey());
+            String dg = selectedServer.getDeviceGateway();
+            if (dg != null)
+                mSSO_DeviceGateway.setText(dg);
+            String db = selectedServer.getDataBroker();
+            if (db != null)
+                mSSO_DataBroker.setText(db);
             mSSO_Secure.setChecked(selectedServer.isSecure());
         } else{
             Log.d(TAG, "sso not selected, new sso will be created");
         }
+    }
 
-
-        mSaveSSOButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                BayesServer server = getBayesServer();
-                getWaylayApplication().selectServer(server);
-                setResult(RESULT_CHANGED);
-                finish();
-            }
-        });
+    @OnClick(R.id.buttonSaveSSOSetup)
+    public void saveSetup() {
+        BayesServer server = getBayesServer();
+        getWaylayApplication().selectServer(server);
+        setResult(RESULT_CHANGED);
+        finish();
     }
 
     private BayesServer getBayesServer(){
         String name = mSSO_Name.getText().toString();
         String password = mSSO_Password.getText().toString();
         String URL = mSSO_URL.getText().toString();
+        String masterkey = mSSO_Masterkey.getText().toString();
+        String deviceGateway = mSSO_DeviceGateway.getText().toString();
+        String databroker = mSSO_DataBroker.getText().toString();
         boolean secure = mSSO_Secure.isChecked();
-        BayesServer server = new BayesServer(URL, name, password, secure);
+        BayesServer server = new BayesServer(URL, name, password, masterkey, deviceGateway, databroker, secure);
         Log.d(TAG, "get sso " + server);
         return server;
     }

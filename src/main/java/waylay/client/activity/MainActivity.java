@@ -2,7 +2,9 @@ package waylay.client.activity;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import waylay.client.sensor.AbstractLocalSensor;
@@ -19,10 +21,13 @@ import com.estimote.sdk.BeaconManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import waylay.client.R;
+import waylay.client.service.push.PushService;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -32,22 +37,31 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.FrameLayout;
 
 public class MainActivity extends BaseActivity implements SensorEventListener, SensorListener,
         SensorsFragement.OnFragmentInteractionListener,
-        SetupFragment.OnFragmentInteractionListener{
+        SetupFragment.OnFragmentInteractionListener, ResourceFragment.OnFragmentInteraction,NavigationView.OnNavigationItemSelectedListener{
 
 	public static final String TAG = "MainActivity";
 
     private static final String FRAGMENT_TAG_SCENARIOS = "tasks";
     private static final String FRAGMENT_TAG_SENSORS = "sensors";
     private static final String FRAGMENT_TAG_SETUP = "setup";
+    private static final String FRAGMENT_TAG_RESOURCE = "resource";
 
     /*
      * Define a request code to send to Google Play services
@@ -63,26 +77,27 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     private AccelerometerSensor accelometerSensor = new AccelerometerSensor();
     private ForceSensor velocitySensor = new ForceSensor();
-    private BeaconSensor beaconSensor = new BeaconSensor();
+   // private BeaconSensor beaconSensor = new BeaconSensor();
     private ActivitySensor activitySensor = new ActivitySensor();
 
     private SensorManager sensorManager;
     private LocationManager locationManager;
-    private BeaconManager beaconManager;
+    //private BeaconManager beaconManager;
     private ActivityManager activityManager;
+    private final Map<String, WaylayFragment> fragments = new HashMap<>();
+    private PushService mPushService;
+
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+        mPushService = getWaylayApplication().getPushService();
 		super.onCreate(savedInstanceState);
-
-		setContentView(R.layout.main);
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        beaconManager = new BeaconManager(getApplicationContext());
+        //beaconManager = new BeaconManager(getApplicationContext());
         activityManager = new ActivityManager(getApplicationContext());
 
         initLocalSensors();
@@ -94,6 +109,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(true);
         //actionBar.setDisplayHomeAsUpEnabled(true);
+
 
         ActionBar.Tab tab = actionBar.newTab()
                 .setText("Tasks")
@@ -108,11 +124,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         actionBar.addTab(tab);
 
         tab = actionBar.newTab()
+                .setText("Resource")
+                .setTabListener(new DefaultTabListener<ResourceFragment>(this, FRAGMENT_TAG_RESOURCE, ResourceFragment.class));
+        actionBar.addTab(tab);
+
+        tab = actionBar.newTab()
                 .setText("Setup")
                 .setTabListener(new DefaultTabListener<SetupFragment>(
                         this, FRAGMENT_TAG_SETUP, SetupFragment.class));
         actionBar.addTab(tab);
-
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -177,13 +197,13 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     @Override
 	public void stopPush(){
-        getWaylayApplication().stopPushing();
+        mPushService.stopPushing();
 	}
 
     @Override
-    public void pushAll() {
+    public void pushAll(int time) {
         for(AbstractLocalSensor sensor:listLocalSensors){
-            getWaylayApplication().startPushing(sensor);
+            mPushService.startPushing(sensor, time);
         }
     }
 
@@ -193,6 +213,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         if(fragment != null) {
             fragment.refreshAllScenarios();
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        return false;
     }
 
     // Define a DialogFragment that displays the error dialog
@@ -241,6 +266,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     }
 
+
+
     private boolean servicesConnected() {
         // Check that Google Play services is available
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -278,7 +305,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         listLocalSensors.add(locationSensor);
         listLocalSensors.add(accelometerSensor);
         listLocalSensors.add(velocitySensor);
-        listLocalSensors.add(beaconSensor);
+        //listLocalSensors.add(beaconSensor);
         listLocalSensors.add(activitySensor);
 
         for(Sensor sensor:sensorManager.getSensorList(Sensor.TYPE_ALL)){
@@ -306,7 +333,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
         SensorListener buffered = new BufferingSensorListener(this, 1, TimeUnit.SECONDS);
 
         locationSensor.start(getApplication(), locationManager, buffered);
-        beaconSensor.start(beaconManager, buffered);
+        //beaconSensor.start(beaconManager, buffered);
         sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this,
@@ -326,7 +353,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener, S
 
     private void stopSensors() {
         locationSensor.stop(locationManager);
-        beaconSensor.stop(beaconManager);
+        //beaconSensor.stop(beaconManager);
         sensorManager.unregisterListener(this);
         for(AbstractLocalSensor sensor:listLocalSensors){
             if(sensor instanceof RawSensor){
