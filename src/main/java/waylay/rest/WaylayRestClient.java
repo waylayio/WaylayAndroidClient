@@ -29,11 +29,36 @@ public class WaylayRestClient {
 	private final BayesServer server;
     private final WaylayRestApi service;
     private final WaylayRestApi dataService;
+    private final DeviceGatewayRestApi deviceGatewayRestApi;
 
     public WaylayRestClient(final BayesServer server) {
         this.server = server;
         this.service = createRestClient(server);
         this.dataService = createBridgeRestClient(server);
+        this.deviceGatewayRestApi = createDeviceGatewayClient(server);
+    }
+
+    private DeviceGatewayRestApi createDeviceGatewayClient(BayesServer server) {
+        Gson gson = new GsonBuilder()
+                //.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(Map.class, new DeviceAdapter())
+                .create();
+
+        OkHttpClient client = new OkHttpClient();
+        // If you have connection problems like "stream was reset: CANCEL" you can try
+        // to disable SPDY for debugging:
+        // client.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
+        Client restClient = new OkClient(client);
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(server.devicesApiBase())
+                .setRequestInterceptor(new BasicAuthorizationInterceptor(server.getName(), server.getPassword()))
+                .setProfiler(new RequestLoggingProfiler(TAG))
+                .setLogLevel(RestAdapter.LogLevel.FULL)
+                .setLog(new AndroidLog(TAG))
+                .setConverter(new GsonConverter(gson))
+                .setClient(restClient)
+                .build();
+        return restAdapter.create(DeviceGatewayRestApi.class);
     }
 
     public void postScenarioAction(Long scenarioId, String action, final PostResponseCallback<Void> callback){
@@ -47,6 +72,10 @@ public class WaylayRestClient {
 	public void deleteScenarioAction(final long scenarioId, final DeleteResponseCallback callback){
         service.deleteTask(scenarioId, new RetrofitDeleteResponseCallback<Void>(callback));
 	}
+
+    public void createDevice(String godkey, final PostResponseCallback<Map<String, String>> callback) {
+        deviceGatewayRestApi.createDevice(godkey, new RetrofitPostResponseCallback<Map<String, String>>(callback));
+    }
 	
 	/**
 	 * Request a Scenarios from the REST servers.
@@ -95,7 +124,7 @@ public class WaylayRestClient {
         // client.setProtocols(Arrays.asList(Protocol.HTTP_1_1));
         Client restClient = new OkClient(client);
         RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint("https://data.waylay.io")
+                .setEndpoint(server.brokerApiBase())
                 .setRequestInterceptor(new BasicAuthorizationInterceptor(server.getName(), server.getPassword()))
                 .setProfiler(new RequestLoggingProfiler(TAG))
                 .setLogLevel(RestAdapter.LogLevel.FULL)

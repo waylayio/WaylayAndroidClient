@@ -5,7 +5,16 @@
     <string name="app_name">Waylay</string>
     <string name="service_name">Waylay activity service</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="push_all">Push all</string>
-    <string name="stop_pushing">Stop pushing</string>
+    <string name="push_all">Push every</string>
+    <string name="stop_pushing">Pushing every</string>
+    <string name="regenerate">Regenerate</string>
+    <string name="use_authentication">Use authentication</string>
+    <string name="token">Token</string>
+    <string name="secret">Secret</string>
+    <string name="seconds">seconds.</string>
+    <string-array name="connection_types">
+        <item>REST</item>
+        <item>MQTT</item>
+    </string-array>
 
 </resources>

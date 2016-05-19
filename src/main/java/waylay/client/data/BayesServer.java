@@ -4,16 +4,24 @@ public class BayesServer {
 	private final String host;
 	private final String name;
 	private final String password;
+    private final String masterkey;
+    private final String deviceGateway;
+    private final String dataBroker;
     private final boolean secure;
 	
 	public BayesServer(String host, String name, String password, boolean secure) {
-		super();
-		this.host = host;
-		this.name = name;
-		this.password = password;
-        this.secure = secure;
+		this(host, name, password, "", "", "",  secure);
 	}
 
+    public BayesServer(String host, String name, String password, String masterkey, String deviceGateway, String dataBroker, boolean secure) {
+        this.host = host;
+        this.name = name;
+        this.password = password;
+        this.masterkey = masterkey;
+        this.secure = secure;
+        this.deviceGateway = deviceGateway;
+        this.dataBroker = dataBroker;
+    }
 
 	public String getName() {
 		return name;
@@ -31,13 +39,21 @@ public class BayesServer {
         return secure;
     }
 
+    public String getMasterkey() {return masterkey;}
+
+    public String getDeviceGateway() {return deviceGateway;}
+
     @Override
 	public String toString() {
 		return getHost();
 	}
 
-    public String constructURLForWebAP(){
+    public String constructURLForWebAP(String host){
         return getScheme() + "://" + host;
+    }
+
+    public String constructURLForWebAP() {
+        return constructURLForWebAP(host);
     }
 
     public String apiBase() {
@@ -46,6 +62,25 @@ public class BayesServer {
         if(!host.contains("/")){
             url += "/api";
         }
+        return url;
+    }
+
+    public String devicesApiBase() {
+        String url = constructURLForWebAP(deviceGateway);
+        // if we have specific path we see it as the api root
+        if(!url.contains("/client")){
+            url += "/client";
+        }
+        return url;
+    }
+
+    public String getDataBroker() {
+        return dataBroker;
+    }
+
+    public String brokerApiBase() {
+        String url = constructURLForWebAP(dataBroker);
+
         return url;
     }
 
@@ -65,6 +100,9 @@ public class BayesServer {
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result
                 + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((masterkey == null) ? 0 : masterkey.hashCode());
+        result = prime * result + ((deviceGateway == null) ? 0 : deviceGateway.hashCode());
+        result = prime * result + ((dataBroker == null) ? 0 : dataBroker.hashCode());
         return result;
     }
 
@@ -94,6 +132,22 @@ public class BayesServer {
                 return false;
         } else if (!password.equals(other.password))
             return false;
+        if (masterkey == null) {
+            if (other.password != null)
+                return false;
+        } else if (!masterkey.equals(other.masterkey))
+            return false;
+        if (deviceGateway == null) {
+            if (other.deviceGateway != null)
+                return false;
+        } else if (!deviceGateway.equals(other.deviceGateway))
+            return false;
+        if (dataBroker == null) {
+            if (other.dataBroker != null)
+                return false;
+        } else if (!dataBroker.equals(other.dataBroker))
+            return false;
+
         return true;
     }
 

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import waylay.client.R;
 
 import waylay.client.sensor.AbstractLocalSensor;
+import waylay.client.service.push.PushService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,6 +45,7 @@ public class SensorsFragement extends WaylayFragment {
     public static AbstractLocalSensor selectedLocalSensor;
 
     private ListView mLocalSensorList;
+    private PushService mPushService;
 
 
 
@@ -83,7 +85,7 @@ public class SensorsFragement extends WaylayFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sensors, container, false);
-
+        mPushService = getWaylayApplication().getPushService();
         mLocalSensorList = (ListView) view.findViewById(R.id.listUsers);
         mLocalSensorList.setAdapter(adapterLocalSensors);
         mLocalSensorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -93,8 +95,8 @@ public class SensorsFragement extends WaylayFragment {
                 selectedLocalSensor = sensor;
                 Log.d(TAG, "Selected sensor " + sensor.getName());
 
-                getWaylayApplication().startPushing(selectedLocalSensor);
-                Toast.makeText(getActivity(), "Started pushing data for sensor " + selectedLocalSensor.getName(), Toast.LENGTH_SHORT).show();
+                mPushService.pushOnce(selectedLocalSensor);
+                Toast.makeText(getActivity(), "Pushed data for sensor " + selectedLocalSensor.getName(), Toast.LENGTH_SHORT).show();
             }
         });
 

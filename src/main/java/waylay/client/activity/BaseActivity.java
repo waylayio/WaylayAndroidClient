@@ -25,6 +25,12 @@ public class BaseActivity extends AppCompatActivity implements LoadingListener{
         return (T) getSupportFragmentManager().findFragmentByTag(tag);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getWaylayApplication().getMqttManager().disconnectAllMqttServers();
+    }
+
     public void startLoading(){
 //        if(loadingCount == 0) {
 //            progress = ProgressDialog.show(this, "", "Loading. Please wait...", true);

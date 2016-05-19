@@ -165,21 +165,7 @@ public class SetupFragment extends WaylayFragment {
             }
         });
 
-        Button buttonPushAll = (Button) view.findViewById(R.id.buttonPushAll);
-        buttonPushAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.pushAll();
-                Toast.makeText(getActivity(), "Pushing all sensors", Toast.LENGTH_SHORT).show();
-            }
-        });
-        Button buttonStopPushingData = (Button) view.findViewById(R.id.buttonStopPushingData);
-        buttonStopPushingData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.stopPush();
-            }
-        });
+
 
         return view;
     }
@@ -224,9 +210,6 @@ public class SetupFragment extends WaylayFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        void stopPush();
-
-        void pushAll();
 
         void onServerChange();
     }
