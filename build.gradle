@@ -1,18 +1,20 @@
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
 
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-        //classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.0'
+        // according to http://stackoverflow.com/questions/33881984/errorcause-com-android-sdklib-repository-fullrevision/33889117#33889117
+        classpath 'com.github.JakeWharton:sdk-manager-plugin:220bf7a88a7072df3ed16dc8466fb144f2817070'
     }
 }
 
 // see https://github.com/JakeWharton/sdk-manager-plugin
 // This Gradle plugin will manage these SDK dependencies for you automatically.
-//apply plugin: 'android-sdk-manager'
+apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
@@ -21,6 +23,7 @@ repositories {
     maven {
         url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
     }
+
 }
 
 dependencies {
