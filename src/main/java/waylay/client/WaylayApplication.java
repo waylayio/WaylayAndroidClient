@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.crittercism.app.Crittercism;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import com.joshdholtz.sentry.Sentry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,11 +48,16 @@ public class WaylayApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Crittercism.initialize(getApplicationContext(), "53bfecd683fb790c3c000004");
+        try {
+            Sentry.init(this, getApplicationContext().getString(R.string.sentry_private_sdn));
+        } catch (Exception ex) {
+            Log.e(TAG, ex.getMessage(), ex);
+        }
         com.estimote.sdk.EstimoteSDK.enableDebugLogging(true);
         initServers();
         mqttManager = new PahoMqttManager(this);
         pushService = new WaylayPushService(this, mqttManager);
+
     }
 
     public MqttManager getMqttManager() {
