@@ -24,7 +24,7 @@ repositories {
         url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
     }
     maven { url 'https://maven.fabric.io/public' }
-    maven { url "http://jcenter.bintray.com" }
+    maven { url 'https://dl.bintray.com/joshdholtz/maven/' }
 
 }
 
