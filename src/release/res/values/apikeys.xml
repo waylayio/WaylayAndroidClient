@@ -7,7 +7,7 @@
     <string name="waylay_api_secret" translatable="false" templateMergeStrategy="preserve">
         xxx
     </string>
-    <string name="sentry_private_sdn" translatable="false" templateMergeStrategy="preserve">
+    <string name="sentry_private_dsn" translatable="false" templateMergeStrategy="preserve">
         xxx
     </string>
 </resources>

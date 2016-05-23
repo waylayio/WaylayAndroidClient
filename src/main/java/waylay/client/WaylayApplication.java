@@ -49,7 +49,7 @@ public class WaylayApplication extends Application {
     public void onCreate() {
         super.onCreate();
         try {
-            Sentry.init(this, getApplicationContext().getString(R.string.sentry_private_sdn));
+            Sentry.init(this, getApplicationContext().getString(R.string.sentry_private_dsn));
         } catch (Exception ex) {
             Log.e(TAG, ex.getMessage(), ex);
         }
